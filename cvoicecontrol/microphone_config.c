@@ -1071,6 +1071,15 @@ int saveConfiguration()
 
   /***** retrieve home directory */
 
+  fprintf(stderr, "Couldn't init the only available audio device: \n");
+  fprintf(stderr, "Mixer Device    = %s\n", getMixer());
+  fprintf(stderr, "Audio Device    = %s\n", getAudio());
+  fprintf(stderr, "Mic Level       = %d\n", mic_level);
+  fprintf(stderr, "IGain Level     = %d\n", igain_level);
+  fprintf(stderr, "Record Level    = %d\n", rec_level);
+  fprintf(stderr, "Stop Level      = %d\n", stop_level);
+  fprintf(stderr, "Silence Level   = %d\n", silence_level);
+
   home = getenv("HOME");
   if (home != NULL)
   {
@@ -1082,6 +1091,7 @@ int saveConfiguration()
     strcpy(config_dir, home);
     strcat(config_dir, "/.cvoicecontrol/");
 
+#ifdef AUTOSEARCHMIXER
     if ((f = fopen(config_dir, "r")) == NULL)
     {
       char *command = malloc(strlen("mkdir ") + strlen(config_dir) + 1);
@@ -1101,7 +1111,9 @@ int saveConfiguration()
     fclose(f);
 
     free(home);
+#endif
   }
+#ifdef AUTOSEARCHMIXER
   else /***** couldn't retrieve home directory -> store results in /tmp/ */
   {
     config_dir = malloc(strlen("/tmp/") + 1);
@@ -1120,6 +1132,7 @@ int saveConfiguration()
     wrefresh (savescr);     /***** refresh the dialog */
     getch();                /***** wait for keyboard reaction */
   }
+#endif
 
   /***** config_file = config_dir+"config" */
 
@@ -1130,6 +1143,7 @@ int saveConfiguration()
 
   if ((f = fopen(config_file, "w")) == NULL) /***** failed to write config file */
   {
+#ifdef AUTOSEARCHMIXER
     /***** clear dialog */
 
     for (i = 1; i < width-1; i++)
@@ -1148,6 +1162,7 @@ int saveConfiguration()
 
     retval = 0;  /***** set return value to ERROR */
     goto saveConfigurationReturn;
+#endif
   }
 
   /***** output configuration information to config file */

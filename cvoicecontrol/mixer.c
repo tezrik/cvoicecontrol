@@ -126,6 +126,7 @@ int initMixer()
 {
   int mask_mixer, fd;
 
+#ifdef AUTOSEARCHMIXER
   /***** open mixer device */
 
   if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
@@ -169,6 +170,7 @@ int initMixer()
   }
 
   close(fd);
+#endif
 
   return(MIXER_OK);
 }
@@ -185,18 +187,21 @@ MixerDevices *scanMixerDevices()
 
   MixerDevices *devices; /***** temporary variable */
 
+#ifdef AUTOSEARCHMIXER
   /***** get a list of device names that fit the pattern /dev/mixer*  */
 
   if (glob("/dev/mixer*", 0, NULL, &result) != 0)
     return NULL;
   if (result.gl_pathc < 1)
     return NULL;
+#endif
 
   /*****
    * allocate memory for the structure that will contain
    * the information about the list of available mixer devices
    *****/
   devices       = malloc(sizeof(MixerDevices));
+#ifdef AUTOSEARCHMIXER
   devices->name = malloc((sizeof (char *))*result.gl_pathc);
 
   /***** check each mixer device whether it is working properly */
@@ -223,6 +228,13 @@ MixerDevices *scanMixerDevices()
   }
 
   devices->count = j; /***** number of ok looking mixer devices */
+#else
+  devices->name = malloc(sizeof ("mixer"));
+  devices->name[0] = malloc(strlen("mixer")-5+1);
+  strcpy(devices->name[0], "mixer");
+
+  devices->count = 1; /***** number of ok looking mixer devices */
+#endif
 
   return devices; /***** return the information */
 }
