@@ -82,14 +82,14 @@ char *dataStart(char *s)
  * load configuration
  ********************************************************************************/
 
-int loadConfiguration()
+int loadConfiguration(int automix)
 {
     /***** load configuration */
 
     char *home = getenv("HOME");
     char *config_file;
     FILE *f;
-    char *config_file_tail = "/.cvoicecontrol/config";
+    char *config_file_tail = "/.config/cvoicecontrol";
 
     if (home == NULL)
     {
@@ -173,7 +173,7 @@ int loadConfiguration()
         /***** init mixer device */
 
         setMixer(tmp_dev_mixer);
-        if (initMixer() == MIXER_ERR)
+        if (initMixer(automix) == MIXER_ERR)
         {
             fprintf(stderr, "Failed to initialize mixer device!!\n");
             return 0;

@@ -28,8 +28,8 @@ void noMixer();
 void setMixer(char *dev);
 int  mixerOK();
 const char *getMixer();
-int  initMixer();
-MixerDevices *scanMixerDevices();
+int  initMixer(int automix);
+MixerDevices *scanMixerDevices(int automix);
 
 int setIGainLevel(int level);
 int setMicLevel(int level);

@@ -122,55 +122,56 @@ int mixerHasIGain()
  * check mixer capabilities and initialize mixer
  ********************************************************************************/
 
-int initMixer()
+int initMixer(int automix)
 {
     int mask_mixer, fd;
 
-#ifdef AUTOSEARCHMIXER
-    /***** open mixer device */
-
-    if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
-        return(MIXER_ERR);
-
-    /***** check whether mic and igain devices available */
-
-    if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) == -1)
-        return(MIXER_ERR);
-
-    if (!(mask_mixer & SOUND_MASK_MIC))
-        return(MIXER_ERR);
-
-    /*
-    if (!(mask_mixer & SOUND_MASK_RECLEV))
-      return(MIXER_ERR);
-    */
-
-    /***** check whether available recording sources include microphone */
-
-    if (ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) == -1)
-        return(MIXER_ERR);
-
-    if (!(mask_mixer & SOUND_MASK_MIC))
-        return(MIXER_ERR);
-
-    /***** set microphone as active recording channel */
-
-    if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
-        return(MIXER_ERR);
-
-    if (!(mask_mixer & SOUND_MASK_MIC))
+    if (automix)
     {
-        mask_mixer = SOUND_MASK_MIC;
-        if (ioctl(fd, SOUND_MIXER_WRITE_RECSRC, &mask_mixer) == -1)
+        /***** open mixer device */
+
+        if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
             return(MIXER_ERR);
-        if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
+
+        /***** check whether mic and igain devices available */
+
+        if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) == -1)
             return(MIXER_ERR);
+
         if (!(mask_mixer & SOUND_MASK_MIC))
             return(MIXER_ERR);
-    }
 
-    close(fd);
-#endif
+        /*
+        if (!(mask_mixer & SOUND_MASK_RECLEV))
+          return(MIXER_ERR);
+        */
+
+        /***** check whether available recording sources include microphone */
+
+        if (ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) == -1)
+            return(MIXER_ERR);
+
+        if (!(mask_mixer & SOUND_MASK_MIC))
+            return(MIXER_ERR);
+
+        /***** set microphone as active recording channel */
+
+        if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
+            return(MIXER_ERR);
+
+        if (!(mask_mixer & SOUND_MASK_MIC))
+        {
+            mask_mixer = SOUND_MASK_MIC;
+            if (ioctl(fd, SOUND_MIXER_WRITE_RECSRC, &mask_mixer) == -1)
+                return(MIXER_ERR);
+            if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
+                return(MIXER_ERR);
+            if (!(mask_mixer & SOUND_MASK_MIC))
+                return(MIXER_ERR);
+        }
+
+        close(fd);
+    }
 
     return(MIXER_OK);
 }
@@ -179,7 +180,7 @@ int initMixer()
  * return a list of available mixer devices
  ********************************************************************************/
 
-MixerDevices *scanMixerDevices()
+MixerDevices *scanMixerDevices(int automix)
 {
     int i,j;            /***** counter variables */
     int mask_mixer, fd; /***** mixer device related variables */
@@ -187,54 +188,56 @@ MixerDevices *scanMixerDevices()
 
     MixerDevices *devices; /***** temporary variable */
 
-#ifdef AUTOSEARCHMIXER
-    /***** get a list of device names that fit the pattern /dev/mixer*  */
+    if (automix)
+    {
+        /***** get a list of device names that fit the pattern /dev/mixer*  */
 
-    if (glob("/dev/mixer*", 0, NULL, &result) != 0)
-        return NULL;
-    if (result.gl_pathc < 1)
-        return NULL;
-#endif
-
+        if (glob("/dev/mixer*", 0, NULL, &result) != 0)
+            return NULL;
+        if (result.gl_pathc < 1)
+            return NULL;
+    }
     /*****
      * allocate memory for the structure that will contain
      * the information about the list of available mixer devices
      *****/
     devices       = malloc(sizeof(MixerDevices));
-#ifdef AUTOSEARCHMIXER
-    devices->name = malloc((sizeof (char *))*result.gl_pathc);
 
-    /***** check each mixer device whether it is working properly */
-
-    for (i = 0, j = 0; i < result.gl_pathc; i++)
+    if (automix)
     {
-        /***** scan abilities of current mixer device */
+        devices->name = malloc((sizeof (char *))*result.gl_pathc);
 
-        if ((fd = open(result.gl_pathv[i], O_RDWR, 0)) != -1       &&
-                ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) != -1 &&
-                (mask_mixer & SOUND_MASK_MIC)   &&
-                /* (mask_mixer & SOUND_MASK_IGAIN) && */
-                ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) != -1 &&
-                (mask_mixer & SOUND_MASK_MIC))
+        /***** check each mixer device whether it is working properly */
+
+        for (i = 0, j = 0; i < result.gl_pathc; i++)
         {
-            /***** if mixer device looks ok add it to the list */
+            /***** scan abilities of current mixer device */
 
-            devices->name[j] = malloc(strlen(result.gl_pathv[i])-5+1);
-            strcpy(devices->name[j], result.gl_pathv[i]+5);
-            j++;
+            if ((fd = open(result.gl_pathv[i], O_RDWR, 0)) != -1       &&
+                    ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) != -1 &&
+                    (mask_mixer & SOUND_MASK_MIC)   &&
+                    /* (mask_mixer & SOUND_MASK_IGAIN) && */
+                    ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) != -1 &&
+                    (mask_mixer & SOUND_MASK_MIC))
+            {
+                /***** if mixer device looks ok add it to the list */
+
+                devices->name[j] = malloc(strlen(result.gl_pathv[i])-5+1);
+                strcpy(devices->name[j], result.gl_pathv[i]+5);
+                j++;
+            }
+
+            close(fd);
         }
 
-        close(fd);
+        devices->count = j; /***** number of ok looking mixer devices */
+    } else {
+        devices->name = malloc(sizeof ("mixer"));
+        devices->name[0] = malloc(strlen("mixer")-5+1);
+        strcpy(devices->name[0], "mixer");
+
+        devices->count = 1; /***** number of ok looking mixer devices */
     }
-
-    devices->count = j; /***** number of ok looking mixer devices */
-#else
-    devices->name = malloc(sizeof ("mixer"));
-    devices->name[0] = malloc(strlen("mixer")-5+1);
-    strcpy(devices->name[0], "mixer");
-
-    devices->count = 1; /***** number of ok looking mixer devices */
-#endif
 
     return devices; /***** return the information */
 }

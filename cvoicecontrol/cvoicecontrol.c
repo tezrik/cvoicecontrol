@@ -17,25 +17,25 @@
 
 #define MAIN_C
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include<math.h>
-#include<float.h>
+#include <math.h>
+#include <float.h>
 
-#include<pthread.h>
+#include <pthread.h>
 
-#include<unistd.h>
-#include<fcntl.h>
-#include<sys/ioctl.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
 
-#include<sys/time.h>
-#include<sys/types.h>
-#include<sys/soundcard.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/soundcard.h>
 
 #ifdef _AIX
-#include<sys/select.h>
+#include <sys/select.h>
 #endif
 
 #include "cvoicecontrol.h"
@@ -243,6 +243,43 @@ void waitForAutoRecordingRequest()
 
 int main(int argc, char *argv[])
 {
+    int opt;
+    int automix = 0;
+    int run_once = 0;
+    int fhelp = 0;
+    while ((opt = getopt(argc, argv, ":aoh")) != -1)
+    {
+        switch(opt)
+        {
+            case 'a':
+                automix = 1;
+                break;
+            case 'o':
+                run_once = 1;
+                break;
+            case 'h':
+                fhelp = 1;
+                break;
+            case ':':
+                printf("option needs a value\n");
+                break;
+            case '?':
+                printf("unknown option: %c\n", optopt);
+                break;
+        }
+    }
+    if(optind + 1 > argc || fhelp)
+    {
+        printf("Usage : %s [options] <speakermodel.cvc>\n\n", argv[0]);
+        printf("options:\n");
+        printf("          -a    enable auto search mixer\n");
+        printf("          -o    is specified, the program will exit after the first successful\n");
+        printf("                recognition run. In this case the exit code will be the id of\n");
+        printf("                the recognized speaker model item. This feature is provided to\n");
+        printf("                allow for speech prompts in shell scripts.\n");
+        printf("          -h    this help\n");
+        return 0;       
+    }
     /***** thread variables */
 
     pthread_t record_t;
@@ -251,33 +288,14 @@ int main(int argc, char *argv[])
 
     char *model_file;
 
-    if ((argc != 2 && argc != 3) ||
-            (argc == 3 && strcmp(argv[1], "--once") != 0))
-    {
-        printf("Usage: %s [--once] <speakermodel.cvc>\n", argv[0]);
-        printf("If --runonce is specified, the program will exit after the first successful\n");
-        printf("recognition run. In this case the exit code will be the id of the recognized\n");
-        printf("speaker model item. This feature is provided to allow for speech prompts in\n");
-        printf("shell scripts.\n");
-
-        exit(-1);
-    }
-    else if (argc == 3 && strcmp(argv[1], "--once") == 0)
-    {
-        run_once = 1;
-        model_file = argv[2];
-    }
-    else if (argc == 2)
-    {
-        model_file = argv[1];
-    }
+    model_file = argv[optind];
 
     /*****
-     * load configuration from ~/.cvoicecontrol/config :
+     * load configuration from ~/.config/cvoicecontrol :
      * see configuration.h for more information on what
      * configuration data is loaded ...
      *****/
-    if (loadConfiguration() == 0)
+    if (loadConfiguration(automix) == 0)
     {
         fprintf(stderr, "Couldn't load configuration!");
         fprintf(stderr, "Please run cvoicecontrol_microphone_config before using this application!\n");
@@ -551,7 +569,7 @@ void recognize(void)
                 while (getAudioStatus() != A_off)
                     ;
                 beep();
-                setAudioStatus(A_prefetching);	/* switch audio thread back to 'auto recording' */
+                setAudioStatus(A_prefetching);  /* switch audio thread back to 'auto recording' */
 
                 continue;
             }
@@ -1097,7 +1115,7 @@ void preprocess(void)
         case Q_data:          /***** nothing special to do at this point, just process data below*/
         case Q_end:
             break;
-        case Q_abort:   	  /***** don't process this frame */
+        case Q_abort:         /***** don't process this frame */
             /***** insert an 'abort' marked frame into the queue to signal 'aborting'! */
             enqueue(&queue2, feat_vector, FEAT_VEC_SIZE, Q_abort);
             setPDone(1);

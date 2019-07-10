@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "model_editor.h"
 
@@ -148,7 +149,7 @@ int playSample(ModelItemSample *sample)
  * record a sample utterance
  ********************************************************************************/
 
-ModelItemSample *recordSample()
+ModelItemSample *recordSample(int automix)
 {
     /***** allocate memory for the new sample */
 
@@ -160,7 +161,7 @@ ModelItemSample *recordSample()
 
     /***** initialize the audio device */
 
-    if (initMixer() == MIXER_ERR) /***** if mixer error, return nothing */
+    if (initMixer(automix) == MIXER_ERR) /***** if mixer error, return nothing */
     {
         free(new_sample);
         return NULL;
@@ -234,7 +235,7 @@ ModelItemSample *recordSample()
  * edit speaker model item
  ********************************************************************************/
 
-void editModelItem(ModelItem *model_item)
+void editModelItem(ModelItem *model_item, int automix)
 {
     int width = 65, height = 22, i, j;             /***** ncurses related variables */
     WINDOW *itemscr = popupWindow (width, height);
@@ -437,7 +438,7 @@ void editModelItem(ModelItem *model_item)
             wmove(recordscr, 1, 12); /***** move cursor to a convenient location */
             wrefresh (recordscr);    /***** refresh dialog screen */
 
-            new_sample = recordSample(); /***** auto record a sample utterance */
+            new_sample = recordSample(automix); /***** auto record a sample utterance */
 
             if (new_sample != NULL) /***** if the recording was successful ... */
             {
@@ -524,7 +525,7 @@ void editModelItem(ModelItem *model_item)
  * edit speaker model
  ********************************************************************************/
 
-void editModel()
+void editModel(int automix)
 {
     int width = 65, height = 22, i, j;            /***** ncurses related variables */
     WINDOW *editscr = popupWindow(width, height);
@@ -690,7 +691,7 @@ void editModel()
             break;
         case ENTER: /***** edit the currently selected model item */
             if (model->number_of_items > 0)
-                editModelItem(getModelItem(model, top+current));
+                editModelItem(getModelItem(model, top+current), automix);
             break;
         case 'a':   /***** append a new item to the speaker model */
             appendEmptyModelItem(model, "New Item", "New Command");
@@ -729,6 +730,35 @@ void editModel()
 
 int main(int argc, char *argv[])
 {
+    int opt;
+    int automix = 0;
+    int fhelp = 0;
+    while ((opt = getopt(argc, argv, ":ah")) != -1)
+    {
+        switch(opt)
+        {
+            case 'a':
+                automix = 1;
+                break;
+            case 'h':
+                fhelp = 1;
+                break;
+            case ':':
+                printf("option needs a value\n");
+                break;
+            case '?':
+                printf("unknown option: %c\n", optopt);
+                break;
+        }
+    }
+    if(fhelp)
+    {
+        printf("Usage : %s [options]\n\n", argv[0]);
+        printf("options:\n");
+        printf("          -a    enable auto search mixer\n");
+        printf("          -h    this help\n");
+        return 0;       
+    }
     /*****
      * boolean value indicates when to break main loop
      * (and thus finish this configuration tool)
@@ -744,7 +774,7 @@ int main(int argc, char *argv[])
 
     /***** load configuration */
 
-    if (loadConfiguration() == 0)
+    if (loadConfiguration(automix) == 0)
     {
         fprintf(stderr, "couldn't load configuration!");
         exit(-1);
@@ -929,7 +959,7 @@ int main(int argc, char *argv[])
                 }
                 break;
             case 2: /***** edit the speaker model */
-                editModel();
+                editModel(automix);
                 break;
             case 3: /***** save the speaker model */
                 if (model->number_of_items > 0)

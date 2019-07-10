@@ -1,6 +1,6 @@
 /***************************************************************************
                           microphone_config.c  -  microphone calibration
-                          												tool
+                                                                        tool
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -22,6 +22,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "microphone_config.h"
 
@@ -117,7 +118,7 @@ int safeExit()
  * select mixer from list of available mixer devices
  ********************************************************************************/
 
-int selectMixer()
+int selectMixer(int automix)
 {
     int top = 0, current = 0; /***** selection menu related variables */
     int max_view = 9;
@@ -203,7 +204,7 @@ int selectMixer()
         case ENTER:   /***** make selection with Enter or Space bar */
         case BLANK:
             setMixer(mixer_devices->name[top+current]); /***** set mixer device to highlighted item */
-            retval = initMixer();                       /***** retval is ok, if initMixer() returned ok */
+            retval = initMixer(automix);                       /***** retval is ok, if initMixer() returned ok */
             request_finish = 1;                         /***** leave dialog */
             break;
         }
@@ -1027,7 +1028,7 @@ estimateChannelMeanReturn:
  * save configuration
  ********************************************************************************/
 
-int saveConfiguration()
+int saveConfiguration(int autohome)
 {
     char *home;        /***** config file related variables */
     char *config_dir;
@@ -1059,7 +1060,7 @@ int saveConfiguration()
     /***** dialog message */
 
     mvwaddstr(savescr, 4, 2, "Your configuration will be saved to");
-    mvwaddstrcntr(savescr, 6, width, "~/.cvoicecontrol/config");
+    mvwaddstrcntr(savescr, 6, width, "~/.config/cvoicecontrol");
     mvwaddstrcntr(savescr, 8, width, "Press any key to proceed ...");
 
     wmove(savescr, 1, 22);  /***** set cursor to an appropriate location */
@@ -1091,125 +1092,128 @@ int saveConfiguration()
     {
         FILE *f;
 
-        /***** make sure the config_dir "~/.cvoicecontrol/" exists */
+        /***** make sure the config_dir "~/.config/" exists */
 
-        config_dir = malloc(strlen(home) + strlen("/.cvoicecontrol/") + 1);
+        config_dir = malloc(strlen(home) + strlen("/.config/") + 1);
         strcpy(config_dir, home);
-        strcat(config_dir, "/.cvoicecontrol/");
+        strcat(config_dir, "/.config/");
 
-#ifdef AUTOSEARCHMIXER
-        if ((f = fopen(config_dir, "r")) == NULL)
+        if (autohome)
         {
-            char *command = malloc(strlen("mkdir ") + strlen(config_dir) + 1);
-            strcpy(command, "mkdir ");
-            strcat(command, config_dir);
-            system(command);
-
             if ((f = fopen(config_dir, "r")) == NULL)
             {
-                free(config_dir);
-                config_dir = malloc(strlen("/tmp/") + 1);
-                strcpy(config_dir, "/tmp/");
+                char *command = malloc(strlen("mkdir ") + strlen(config_dir) + 1);
+                strcpy(command, "mkdir ");
+                strcat(command, config_dir);
+                system(command);
+
+                if ((f = fopen(config_dir, "r")) == NULL)
+                {
+                    free(config_dir);
+                    config_dir = malloc(strlen("/tmp/") + 1);
+                    strcpy(config_dir, "/tmp/");
+                }
+
+                free(command);
             }
+            fclose(f);
 
-            free(command);
+            free(home);
         }
-        fclose(f);
-
-        free(home);
-#endif
     }
-#ifdef AUTOSEARCHMIXER
     else /***** couldn't retrieve home directory -> store results in /tmp/ */
     {
-        config_dir = malloc(strlen("/tmp/") + 1);
-        strcpy(config_dir, "/tmp/");
+        if (autohome)
+        {
+            config_dir = malloc(strlen("/tmp/") + 1);
+            strcpy(config_dir, "/tmp/");
+        }
     }
 
-    /***** tell user if home directory couldn't be retrieved and /tmp/ is used instead */
-
-    if (strcmp(config_dir, "/tmp/") == 0)
+    if (autohome)
     {
-        mvwaddstr(savescr, 4, 2, "Failed to retrieve your home directory,");
-        mvwaddstr(savescr, 5, 2, "please contact your local system admin!");
-        mvwaddstr(savescr, 6, 2, "Configuration will be stored to /tmp/ instead!");
+        /***** tell user if home directory couldn't be retrieved and /tmp/ is used instead */
 
-        wmove(savescr, 1, 22);  /***** set cursor to an appropriate location */
-        wrefresh (savescr);     /***** refresh the dialog */
-        getch();                /***** wait for keyboard reaction */
+        if (strcmp(config_dir, "/tmp/") == 0)
+        {
+            mvwaddstr(savescr, 4, 2, "Failed to retrieve your home directory,");
+            mvwaddstr(savescr, 5, 2, "please contact your local system admin!");
+            mvwaddstr(savescr, 6, 2, "Configuration will be stored to /tmp/ instead!");
+
+            wmove(savescr, 1, 22);  /***** set cursor to an appropriate location */
+            wrefresh (savescr);     /***** refresh the dialog */
+            getch();                /***** wait for keyboard reaction */
+        }
     }
-#endif
 
     /***** config_file = config_dir+"config" */
 
-    config_file = malloc(strlen(config_dir) + strlen("config") + 1);
+    config_file = malloc(strlen(config_dir) + strlen("cvoicecontrol") + 1);
     strcpy(config_file, config_dir);
-    strcat(config_file, "config");
+    strcat(config_file, "cvoicecontrol");
     free (config_dir);
 
     if ((f = fopen(config_file, "w")) == NULL) /***** failed to write config file */
     {
-#ifdef AUTOSEARCHMIXER
+        if (autohome)
+        {
+            /***** clear dialog */
+
+            for (i = 1; i < width-1; i++)
+                for (j = 3; j < height-1; j++)
+                    mvwaddch(savescr, j, i, ' ');
+
+            /***** dialog message */
+
+            mvwaddstr(savescr, 5, 2, "Failed to create your configuration file! Oops!");
+            mvwaddstr(savescr, 6, 2, "What's going on?");
+            mvwaddstrcntr(savescr, 8, width, "Press any key to return to menu ...");
+
+            wmove(savescr, 1, 22);  /***** set cursor to an appropriate location */
+            wrefresh (savescr);     /***** refresh the dialog */
+            getch();                /***** wait for keyboard reaction */
+
+            retval = 0;  /***** set return value to ERROR */
+        }
+    } else {
+        /***** output configuration information to config file */
+
+        fprintf(f, "Mixer Device    = %s\n", getMixer());
+        fprintf(f, "Audio Device    = %s\n", getAudio());
+        fprintf(f, "Mic Level       = %d\n", mic_level);
+        fprintf(f, "IGain Level     = %d\n", igain_level);
+        fprintf(f, "Record Level    = %d\n", rec_level);
+        fprintf(f, "Stop Level      = %d\n", stop_level);
+        fprintf(f, "Silence Level   = %d\n", silence_level);
+        fprintf(f, "Channel Mean    =");
+        for (i = 0; i < FEAT_VEC_SIZE; i++)
+            fprintf(f, " %6.5f", channel_mean[i]);
+        fprintf(f, "\n");
+        fclose(f);
+
         /***** clear dialog */
 
+        for (i = 1; i < width-1; i++)
+            mvwaddch(savescr, 1, i, ' ');
         for (i = 1; i < width-1; i++)
             for (j = 3; j < height-1; j++)
                 mvwaddch(savescr, j, i, ' ');
 
-        /***** dialog message */
+        /***** update dialog to tell user that the configuration has been saved successfully */
 
-        mvwaddstr(savescr, 5, 2, "Failed to create your configuration file! Oops!");
-        mvwaddstr(savescr, 6, 2, "What's going on?");
-        mvwaddstrcntr(savescr, 8, width, "Press any key to return to menu ...");
+        mvwaddstr(savescr, 1, 2, "Success!");
 
-        wmove(savescr, 1, 22);  /***** set cursor to an appropriate location */
+        mvwaddstr(savescr, 4, 2, "Your configuration has been saved successfully to");
+        mvwaddstr(savescr, 5, 4, config_file);
+        mvwaddstr(savescr, 7, 2, "CVoiceControl is now ready to use!");
+        mvwaddstrcntr(savescr, 9, width, "Press any key to return to menu ...");
+
+        retval = 1; /***** set return value to ok */
+
+        wmove(savescr, 1, 11);  /***** set cursor to an appropriate location */
         wrefresh (savescr);     /***** refresh the dialog */
         getch();                /***** wait for keyboard reaction */
-
-        retval = 0;  /***** set return value to ERROR */
-        goto saveConfigurationReturn;
-#endif
     }
-
-    /***** output configuration information to config file */
-
-    fprintf(f, "Mixer Device    = %s\n", getMixer());
-    fprintf(f, "Audio Device    = %s\n", getAudio());
-    fprintf(f, "Mic Level       = %d\n", mic_level);
-    fprintf(f, "IGain Level     = %d\n", igain_level);
-    fprintf(f, "Record Level    = %d\n", rec_level);
-    fprintf(f, "Stop Level      = %d\n", stop_level);
-    fprintf(f, "Silence Level   = %d\n", silence_level);
-    fprintf(f, "Channel Mean    =");
-    for (i = 0; i < FEAT_VEC_SIZE; i++)
-        fprintf(f, " %6.5f", channel_mean[i]);
-    fprintf(f, "\n");
-    fclose(f);
-
-    /***** clear dialog */
-
-    for (i = 1; i < width-1; i++)
-        mvwaddch(savescr, 1, i, ' ');
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(savescr, j, i, ' ');
-
-    /***** update dialog to tell user that the configuration has been saved successfully */
-
-    mvwaddstr(savescr, 1, 2, "Success!");
-
-    mvwaddstr(savescr, 4, 2, "Your configuration has been saved successfully to");
-    mvwaddstr(savescr, 5, 4, config_file);
-    mvwaddstr(savescr, 7, 2, "CVoiceControl is now ready to use!");
-    mvwaddstrcntr(savescr, 9, width, "Press any key to return to menu ...");
-
-    retval = 1; /***** set return value to ok */
-
-    wmove(savescr, 1, 11);  /***** set cursor to an appropriate location */
-    wrefresh (savescr);     /***** refresh the dialog */
-    getch();                /***** wait for keyboard reaction */
-
-saveConfigurationReturn:
 
     free(config_file);
     return(retval);
@@ -1222,6 +1226,43 @@ saveConfigurationReturn:
 
 int main(int argc, char *argv[])
 {
+    int opt;
+    int automix = 0;
+    int autohome = 0;
+    int fhelp = 0;
+    char *namefilter;
+    namefilter="threshold";
+    while ((opt = getopt(argc, argv, ":adh")) != -1)
+    {
+        switch(opt)
+        {
+            case 'a':
+                automix = 1;
+                break;
+            case 'd':
+                autohome = 1;
+                break;
+            case 'h':
+                fhelp = 1;
+                break;
+            case ':':
+                printf("option needs a value\n");
+                break;
+            case '?':
+                printf("unknown option: %c\n", optopt);
+                break;
+        }
+    }
+    if(fhelp)
+    {
+        printf("Usage : %s [options]\n\n", argv[0]);
+        printf("options:\n");
+        printf("          -a    enable auto search mixer\n");
+        printf("          -d    enable search config in home\n");
+        printf("          -h    this help\n");
+        return 0;       
+    }
+    
     /*****
      * boolean value indicates when to break main loop
      * (and thus finish this configuration tool)
@@ -1237,7 +1278,7 @@ int main(int argc, char *argv[])
 
     /* ***** detect available mixer devices */
 
-    mixer_devices = scanMixerDevices();
+    mixer_devices = scanMixerDevices(automix);
     if (mixer_devices == NULL || mixer_devices->count == 0)
     {
         /* ***** no mixer devices available -> exit! */
@@ -1252,7 +1293,7 @@ int main(int argc, char *argv[])
         {
             setMixer(mixer_devices->name[0]); /***** set this mixer */
 
-            if (initMixer() == MIXER_OK) /***** if mixer is ok, keep it */
+            if (initMixer(automix) == MIXER_OK) /***** if mixer is ok, keep it */
             {
                 status[0] = ok;
                 status[2] = invalid;
@@ -1273,7 +1314,7 @@ int main(int argc, char *argv[])
                 if (strcmp(mixer_devices->name[i], "mixer") == 0)
                 {
                     setMixer("mixer");
-                    if (initMixer() == MIXER_OK)
+                    if (initMixer(automix) == MIXER_OK)
                     {
                         status[0] = ok;
                         status[2] = invalid;
@@ -1463,7 +1504,7 @@ int main(int argc, char *argv[])
                 status[4] = inactive;
                 status[5] = inactive;
                 noMixer();
-                if (selectMixer() == MIXER_OK)
+                if (selectMixer(automix) == MIXER_OK)
                 {
                     status[0] = ok;
                     status[2] = invalid;
@@ -1499,7 +1540,7 @@ int main(int argc, char *argv[])
                     status[4] = invalid;
                 break;
             case 5: /***** save configuration! */
-                if (saveConfiguration())
+                if (saveConfiguration(autohome))
                 {
                     status[5] = ok;
                     status[6] = ok;
