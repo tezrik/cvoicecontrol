@@ -29,17 +29,17 @@
   *****/
 struct _ScoreQueueItem
 {
-  float score;
-  int   id;
-  struct _ScoreQueueItem *next;
+    float score;
+    int   id;
+    struct _ScoreQueueItem *next;
 };
 typedef struct _ScoreQueueItem ScoreQueueItem;
 
 typedef struct
 {
-  int length;
+    int length;
 
-  ScoreQueueItem *first;
+    ScoreQueueItem *first;
 } ScoreQueue;
 
 void initScoreQueue(ScoreQueue *queue);

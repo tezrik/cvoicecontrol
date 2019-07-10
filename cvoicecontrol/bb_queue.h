@@ -24,19 +24,19 @@
   *****/
 struct _BBQueueItem
 {
-  int   pos;
-  float score;
-  int   sample_index;
+    int   pos;
+    float score;
+    int   sample_index;
 
-  struct _BBQueueItem *next;
+    struct _BBQueueItem *next;
 };
 typedef struct _BBQueueItem BBQueueItem;
 
 typedef struct
 {
-  int length;
+    int length;
 
-  BBQueueItem *first;
+    BBQueueItem *first;
 } BBQueue;
 
 void initBBQueue(BBQueue *queue);

@@ -36,25 +36,25 @@ char *dev_mixer = NULL;
 
 void setMixer(char *dev)
 {
-  char *prefix = "/dev/"; /***** prefix of directory where device files are located */
+    char *prefix = "/dev/"; /***** prefix of directory where device files are located */
 
-  if (dev == NULL)
-    return;
+    if (dev == NULL)
+        return;
 
-  if (dev_mixer != NULL) /***** free memory of previously set mixer device */
-    free(dev_mixer);
+    if (dev_mixer != NULL) /***** free memory of previously set mixer device */
+        free(dev_mixer);
 
-  if (strncmp(dev, prefix, 5) == 0) /***** if dev is already of type /dev/... just strcpy it */
-  {
-    dev_mixer = malloc(strlen(dev) + 1);
-    strcpy(dev_mixer, dev);
-  }
-  else /***** otherwise prepend the prefix defined above */
-  {
-    dev_mixer = malloc(strlen(prefix) + strlen(dev) + 1);
-    strcpy(dev_mixer, prefix);
-    strcat(dev_mixer, dev);
-  }
+    if (strncmp(dev, prefix, 5) == 0) /***** if dev is already of type /dev/... just strcpy it */
+    {
+        dev_mixer = malloc(strlen(dev) + 1);
+        strcpy(dev_mixer, dev);
+    }
+    else /***** otherwise prepend the prefix defined above */
+    {
+        dev_mixer = malloc(strlen(prefix) + strlen(dev) + 1);
+        strcpy(dev_mixer, prefix);
+        strcat(dev_mixer, dev);
+    }
 }
 
 /********************************************************************************
@@ -63,10 +63,10 @@ void setMixer(char *dev)
 
 void noMixer()
 {
-  if (dev_mixer != NULL) /***** free memory of previously set mixer device */
-    free(dev_mixer);
+    if (dev_mixer != NULL) /***** free memory of previously set mixer device */
+        free(dev_mixer);
 
-  dev_mixer = NULL;
+    dev_mixer = NULL;
 }
 
 /********************************************************************************
@@ -75,7 +75,7 @@ void noMixer()
 
 const char *getMixer()
 {
-  return(dev_mixer); /***** return value may be NULL, if no mixer is set! */
+    return(dev_mixer); /***** return value may be NULL, if no mixer is set! */
 }
 
 /********************************************************************************
@@ -84,10 +84,10 @@ const char *getMixer()
 
 int mixerOK()
 {
-  if (dev_mixer != NULL)
-    return MIXER_OK;
-  else
-    return MIXER_ERR;
+    if (dev_mixer != NULL)
+        return MIXER_OK;
+    else
+        return MIXER_ERR;
 }
 
 /********************************************************************************
@@ -96,25 +96,25 @@ int mixerOK()
 
 int mixerHasIGain()
 {
-  int mask_mixer, fd;
+    int mask_mixer, fd;
 
-  return MIXER_ERR;
-  /***** open mixer device */
-  
-  if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
-    return(MIXER_ERR);
-  
-  /***** check whether mic and igain devices available */
-  
-  if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) == -1)
-    return(MIXER_ERR);
-  
-  if (!(mask_mixer & SOUND_MASK_IGAIN))
-    return(MIXER_ERR);
-  
-  close(fd);
+    return MIXER_ERR;
+    /***** open mixer device */
 
-  return(MIXER_OK);
+    if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
+        return(MIXER_ERR);
+
+    /***** check whether mic and igain devices available */
+
+    if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) == -1)
+        return(MIXER_ERR);
+
+    if (!(mask_mixer & SOUND_MASK_IGAIN))
+        return(MIXER_ERR);
+
+    close(fd);
+
+    return(MIXER_OK);
 }
 
 
@@ -124,55 +124,55 @@ int mixerHasIGain()
 
 int initMixer()
 {
-  int mask_mixer, fd;
+    int mask_mixer, fd;
 
 #ifdef AUTOSEARCHMIXER
-  /***** open mixer device */
+    /***** open mixer device */
 
-  if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
-    return(MIXER_ERR);
+    if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
+        return(MIXER_ERR);
 
-  /***** check whether mic and igain devices available */
+    /***** check whether mic and igain devices available */
 
-  if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) == -1)
-    return(MIXER_ERR);
+    if (ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) == -1)
+        return(MIXER_ERR);
 
-  if (!(mask_mixer & SOUND_MASK_MIC))
-    return(MIXER_ERR);
-
-  /*
-  if (!(mask_mixer & SOUND_MASK_RECLEV))
-    return(MIXER_ERR);
-  */
-
-  /***** check whether available recording sources include microphone */
-
-  if (ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) == -1)
-    return(MIXER_ERR);
-
-  if (!(mask_mixer & SOUND_MASK_MIC))
-    return(MIXER_ERR);
-
-  /***** set microphone as active recording channel */
-
-  if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
-    return(MIXER_ERR);
-
-  if (!(mask_mixer & SOUND_MASK_MIC))
-  {
-    mask_mixer = SOUND_MASK_MIC;
-    if (ioctl(fd, SOUND_MIXER_WRITE_RECSRC, &mask_mixer) == -1)
-      return(MIXER_ERR);
-    if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
-      return(MIXER_ERR);
     if (!(mask_mixer & SOUND_MASK_MIC))
-      return(MIXER_ERR);
-  }
+        return(MIXER_ERR);
 
-  close(fd);
+    /*
+    if (!(mask_mixer & SOUND_MASK_RECLEV))
+      return(MIXER_ERR);
+    */
+
+    /***** check whether available recording sources include microphone */
+
+    if (ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) == -1)
+        return(MIXER_ERR);
+
+    if (!(mask_mixer & SOUND_MASK_MIC))
+        return(MIXER_ERR);
+
+    /***** set microphone as active recording channel */
+
+    if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
+        return(MIXER_ERR);
+
+    if (!(mask_mixer & SOUND_MASK_MIC))
+    {
+        mask_mixer = SOUND_MASK_MIC;
+        if (ioctl(fd, SOUND_MIXER_WRITE_RECSRC, &mask_mixer) == -1)
+            return(MIXER_ERR);
+        if (ioctl(fd, SOUND_MIXER_READ_RECSRC, &mask_mixer) == -1)
+            return(MIXER_ERR);
+        if (!(mask_mixer & SOUND_MASK_MIC))
+            return(MIXER_ERR);
+    }
+
+    close(fd);
 #endif
 
-  return(MIXER_OK);
+    return(MIXER_OK);
 }
 
 /********************************************************************************
@@ -181,62 +181,62 @@ int initMixer()
 
 MixerDevices *scanMixerDevices()
 {
-  int i,j;            /***** counter variables */
-  int mask_mixer, fd; /***** mixer device related variables */
-  glob_t result;      /***** result of the glob() call */
+    int i,j;            /***** counter variables */
+    int mask_mixer, fd; /***** mixer device related variables */
+    glob_t result;      /***** result of the glob() call */
 
-  MixerDevices *devices; /***** temporary variable */
+    MixerDevices *devices; /***** temporary variable */
 
 #ifdef AUTOSEARCHMIXER
-  /***** get a list of device names that fit the pattern /dev/mixer*  */
+    /***** get a list of device names that fit the pattern /dev/mixer*  */
 
-  if (glob("/dev/mixer*", 0, NULL, &result) != 0)
-    return NULL;
-  if (result.gl_pathc < 1)
-    return NULL;
+    if (glob("/dev/mixer*", 0, NULL, &result) != 0)
+        return NULL;
+    if (result.gl_pathc < 1)
+        return NULL;
 #endif
 
-  /*****
-   * allocate memory for the structure that will contain
-   * the information about the list of available mixer devices
-   *****/
-  devices       = malloc(sizeof(MixerDevices));
+    /*****
+     * allocate memory for the structure that will contain
+     * the information about the list of available mixer devices
+     *****/
+    devices       = malloc(sizeof(MixerDevices));
 #ifdef AUTOSEARCHMIXER
-  devices->name = malloc((sizeof (char *))*result.gl_pathc);
+    devices->name = malloc((sizeof (char *))*result.gl_pathc);
 
-  /***** check each mixer device whether it is working properly */
+    /***** check each mixer device whether it is working properly */
 
-  for (i = 0, j = 0; i < result.gl_pathc; i++)
-  {
-    /***** scan abilities of current mixer device */
-
-    if ((fd = open(result.gl_pathv[i], O_RDWR, 0)) != -1       &&
-	ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) != -1 &&
-	(mask_mixer & SOUND_MASK_MIC)   &&
-	/* (mask_mixer & SOUND_MASK_IGAIN) && */
-	ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) != -1 &&
-	(mask_mixer & SOUND_MASK_MIC))
+    for (i = 0, j = 0; i < result.gl_pathc; i++)
     {
-      /***** if mixer device looks ok add it to the list */
+        /***** scan abilities of current mixer device */
 
-      devices->name[j] = malloc(strlen(result.gl_pathv[i])-5+1);
-      strcpy(devices->name[j], result.gl_pathv[i]+5);
-      j++;
+        if ((fd = open(result.gl_pathv[i], O_RDWR, 0)) != -1       &&
+                ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) != -1 &&
+                (mask_mixer & SOUND_MASK_MIC)   &&
+                /* (mask_mixer & SOUND_MASK_IGAIN) && */
+                ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) != -1 &&
+                (mask_mixer & SOUND_MASK_MIC))
+        {
+            /***** if mixer device looks ok add it to the list */
+
+            devices->name[j] = malloc(strlen(result.gl_pathv[i])-5+1);
+            strcpy(devices->name[j], result.gl_pathv[i]+5);
+            j++;
+        }
+
+        close(fd);
     }
 
-    close(fd);
-  }
-
-  devices->count = j; /***** number of ok looking mixer devices */
+    devices->count = j; /***** number of ok looking mixer devices */
 #else
-  devices->name = malloc(sizeof ("mixer"));
-  devices->name[0] = malloc(strlen("mixer")-5+1);
-  strcpy(devices->name[0], "mixer");
+    devices->name = malloc(sizeof ("mixer"));
+    devices->name[0] = malloc(strlen("mixer")-5+1);
+    strcpy(devices->name[0], "mixer");
 
-  devices->count = 1; /***** number of ok looking mixer devices */
+    devices->count = 1; /***** number of ok looking mixer devices */
 #endif
 
-  return devices; /***** return the information */
+    return devices; /***** return the information */
 }
 
 /********************************************************************************
@@ -245,27 +245,27 @@ MixerDevices *scanMixerDevices()
 
 int setMicLevel(int level)
 {
-  int fd, mask; /***** mixer related variables */
+    int fd, mask; /***** mixer related variables */
 
-  /***** only accept reasonable mixer values */
+    /***** only accept reasonable mixer values */
 
-  if (level < 0 || level > 99)
-    return(MIXER_ERR);
+    if (level < 0 || level > 99)
+        return(MIXER_ERR);
 
-  /***** open mixer devices */
+    /***** open mixer devices */
 
-  if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
-    return(MIXER_ERR);
+    if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
+        return(MIXER_ERR);
 
-  mask = (level<<8)|level; /***** set left and right channel to the same value */
+    mask = (level<<8)|level; /***** set left and right channel to the same value */
 
-  if (ioctl(fd, SOUND_MIXER_WRITE_MIC, &mask) == -1)
-    return(MIXER_ERR);
+    if (ioctl(fd, SOUND_MIXER_WRITE_MIC, &mask) == -1)
+        return(MIXER_ERR);
 
-  close(fd);
+    close(fd);
 
-  mic_level = level; /***** remember mixer level */
-  return(MIXER_OK);
+    mic_level = level; /***** remember mixer level */
+    return(MIXER_OK);
 }
 
 /********************************************************************************
@@ -274,25 +274,25 @@ int setMicLevel(int level)
 
 int setIGainLevel(int level)
 {
-  int fd, mask; /***** mixer related variables */
+    int fd, mask; /***** mixer related variables */
 
-  /***** only accept reasonable mixer values */
+    /***** only accept reasonable mixer values */
 
-  if (level < 1 || level > 99)
-    return(MIXER_ERR);
+    if (level < 1 || level > 99)
+        return(MIXER_ERR);
 
-  /***** open mixer devices */
+    /***** open mixer devices */
 
-  if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
-    return(MIXER_ERR);
+    if ((fd = open(dev_mixer, O_RDWR, 0)) == -1)
+        return(MIXER_ERR);
 
-  mask = (level<<8)|level; /***** set left and right channel to the same value */
+    mask = (level<<8)|level; /***** set left and right channel to the same value */
 
-  if (ioctl(fd, SOUND_MIXER_WRITE_IGAIN, &mask) == -1)
-    return(MIXER_ERR);
+    if (ioctl(fd, SOUND_MIXER_WRITE_IGAIN, &mask) == -1)
+        return(MIXER_ERR);
 
-  close(fd);
+    close(fd);
 
-  igain_level = level; /***** remember mixer level */
-  return(MIXER_OK);
+    igain_level = level; /***** remember mixer level */
+    return(MIXER_OK);
 }

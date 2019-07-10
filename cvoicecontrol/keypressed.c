@@ -39,19 +39,19 @@ fd_set reads_keypressed;
 
 void set_keypress(void)
 {
-  struct termios new_settings;
+    struct termios new_settings;
 
-  tcgetattr(0,&stored_settings);
+    tcgetattr(0,&stored_settings);
 
-  new_settings = stored_settings;
+    new_settings = stored_settings;
 
-  /* Disable canonical mode, and set buffer size to 1 byte */
-  new_settings.c_lflag &= (~ICANON);
-  new_settings.c_cc[VTIME] = 0;
-  new_settings.c_cc[VMIN] = 1;
+    /* Disable canonical mode, and set buffer size to 1 byte */
+    new_settings.c_lflag &= (~ICANON);
+    new_settings.c_cc[VTIME] = 0;
+    new_settings.c_cc[VMIN] = 1;
 
-  tcsetattr(0,TCSANOW,&new_settings);
-  return;
+    tcsetattr(0,TCSANOW,&new_settings);
+    return;
 }
 
 /********************************************************************************
@@ -61,8 +61,8 @@ void set_keypress(void)
 
 void reset_keypress(void)
 {
-  tcsetattr(0,TCSANOW,&stored_settings);
-  return;
+    tcsetattr(0,TCSANOW,&stored_settings);
+    return;
 }
 
 /********************************************************************************
@@ -71,24 +71,24 @@ void reset_keypress(void)
 
 int initKeyPressed()
 {
-  struct timeval time;
-  time.tv_sec = 1;
-  time.tv_usec= 0;
+    struct timeval time;
+    time.tv_sec = 1;
+    time.tv_usec= 0;
 
-  set_keypress();
+    set_keypress();
 
-  if ((fd_stdin = open("/dev/stdin", O_RDONLY, 0)) == -1)
-    return 0;
+    if ((fd_stdin = open("/dev/stdin", O_RDONLY, 0)) == -1)
+        return 0;
 
-  FD_SET(fd_stdin, &reads_keypressed);
+    FD_SET(fd_stdin, &reads_keypressed);
 
-  if (select(fd_stdin+1, &reads_keypressed, NULL, NULL, &time) == -1)
-  {
-    close(fd_stdin);
-    return 0;
-  }
+    if (select(fd_stdin+1, &reads_keypressed, NULL, NULL, &time) == -1)
+    {
+        close(fd_stdin);
+        return 0;
+    }
 
-  return 1;
+    return 1;
 }
 
 /********************************************************************************
@@ -97,14 +97,14 @@ int initKeyPressed()
 
 int keyPressed()
 {
-  char buffer;
+    char buffer;
 
-  /***** return true if there is incoming data ... */
+    /***** return true if there is incoming data ... */
 
-  if ((FD_ISSET(fd_stdin, &reads_keypressed)) && (read(fd_stdin, &buffer, 1) > 0))
-    return 1;
-  else
-    return 0;
+    if ((FD_ISSET(fd_stdin, &reads_keypressed)) && (read(fd_stdin, &buffer, 1) > 0))
+        return 1;
+    else
+        return 0;
 }
 
 /********************************************************************************
@@ -113,8 +113,8 @@ int keyPressed()
 
 void endKeyPressed()
 {
-  FD_ZERO(&reads_keypressed);
-  reset_keypress();
+    FD_ZERO(&reads_keypressed);
+    reset_keypress();
 }
 
 

@@ -47,8 +47,8 @@ signed short rec_level, stop_level, silence_level;
 
 typedef struct
 {
-  int count;   /***** number of available devices */
-  char **name; /***** list of device names */
+    int count;   /***** number of available devices */
+    char **name; /***** list of device names */
 } AudioDevices;
 
 void noAudio();

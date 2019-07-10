@@ -33,9 +33,9 @@
 
 typedef struct Semaphore
 {
-int         v;
-pthread_mutex_t mutex;
-pthread_cond_t cond;
+    int         v;
+    pthread_mutex_t mutex;
+    pthread_cond_t cond;
 }
 Semaphore;
 

@@ -20,8 +20,8 @@
 
 typedef struct
 {
-  int    count;  /***** number of available devices */
-  char **name;   /***** list of device names */
+    int    count;  /***** number of available devices */
+    char **name;   /***** list of device names */
 } MixerDevices;
 
 void noMixer();

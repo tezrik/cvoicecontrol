@@ -36,29 +36,29 @@
 
 struct _ModelItemSample
 {
-  float **data;
-  int     length;
-  char   *id;
+    float **data;
+    int     length;
+    char   *id;
 
-  /***** 'wav present' flag plus data structure to store wav */
+    /***** 'wav present' flag plus data structure to store wav */
 
-  int has_wav;
-  int wav_length;
-  unsigned char *wav_data;
+    int has_wav;
+    int wav_length;
+    unsigned char *wav_data;
 
-  struct _ModelItemSample *next;
+    struct _ModelItemSample *next;
 
-  float *matrix[3];
+    float *matrix[3];
 
-  /********************************************************************************
-   * tells whether this model item is still active for the current recognition run.
-   * an item is deactivated if one of its sample utterances can't be aligned
-   * to the test utterance, that's the case when the score of the sample
-   * utterance exceeds a threshold or when it can't be aligned due to
-   * adjustment window constraints ( ||i(k) - j(k)|| <= r )
-   ********************************************************************************/
+    /********************************************************************************
+     * tells whether this model item is still active for the current recognition run.
+     * an item is deactivated if one of its sample utterances can't be aligned
+     * to the test utterance, that's the case when the score of the sample
+     * utterance exceeds a threshold or when it can't be aligned due to
+     * adjustment window constraints ( ||i(k) - j(k)|| <= r )
+     ********************************************************************************/
 
-  int isActive;
+    int isActive;
 };
 typedef struct _ModelItemSample ModelItemSample;
 
@@ -79,13 +79,13 @@ typedef struct _ModelItemSample ModelItemSample;
 
 struct _ModelItem
 {
-  int   number_of_samples;
-  char *label;
-  char *command;
+    int   number_of_samples;
+    char *label;
+    char *command;
 
-  ModelItemSample *first;
+    ModelItemSample *first;
 
-  struct _ModelItem *next;
+    struct _ModelItem *next;
 
 };
 typedef struct _ModelItem ModelItem;
@@ -98,15 +98,15 @@ typedef struct _ModelItem ModelItem;
 
 typedef struct
 {
-  int number_of_items;
+    int number_of_items;
 
-  int total_number_of_sample_utterances;
-  int number_of_active_sample_utterances;
+    int total_number_of_sample_utterances;
+    int number_of_active_sample_utterances;
 
-  ModelItemSample **direct;
-  int *direct_map2ref;
+    ModelItemSample **direct;
+    int *direct_map2ref;
 
-  ModelItem *first;
+    ModelItem *first;
 } Model;
 
 void initModel(Model *model);

@@ -33,14 +33,14 @@
 
 void semaphore_init (Semaphore * s)
 {
-  s->v = 1;
-  /*if (pthread_mutex_init (&(s->mutex), pthread_mutexattr_default) == -1)*/
-  if (pthread_mutex_init (&(s->mutex), NULL) == -1)
-    do_error ("Error setting up semaphore mutex");
+    s->v = 1;
+    /*if (pthread_mutex_init (&(s->mutex), pthread_mutexattr_default) == -1)*/
+    if (pthread_mutex_init (&(s->mutex), NULL) == -1)
+        do_error ("Error setting up semaphore mutex");
 
-  /*if (pthread_cond_init (&(s->cond), pthread_condattr_default) == -1)*/
-  if (pthread_cond_init (&(s->cond), NULL) == -1)
-    do_error ("Error setting up semaphore condition signal");
+    /*if (pthread_cond_init (&(s->cond), pthread_condattr_default) == -1)*/
+    if (pthread_cond_init (&(s->cond), NULL) == -1)
+        do_error ("Error setting up semaphore condition signal");
 }
 
 /********************************************************************************
@@ -50,11 +50,11 @@ void semaphore_init (Semaphore * s)
 
 void semaphore_destroy (Semaphore * s)
 {
-  if (pthread_mutex_destroy (&(s->mutex)) == -1)
-    do_error ("Error destroying semaphore mutex");
+    if (pthread_mutex_destroy (&(s->mutex)) == -1)
+        do_error ("Error destroying semaphore mutex");
 
-  if (pthread_cond_destroy (&(s->cond)) == -1)
-    do_error ("Error destroying semaphore condition signal");
+    if (pthread_cond_destroy (&(s->cond)) == -1)
+        do_error ("Error destroying semaphore condition signal");
 }
 
 /********************************************************************************
@@ -64,17 +64,17 @@ void semaphore_destroy (Semaphore * s)
 
 int semaphore_up (Semaphore * s)
 {
-  int         value_after_op;
+    int         value_after_op;
 
-  tw_pthread_mutex_lock (&(s->mutex));
+    tw_pthread_mutex_lock (&(s->mutex));
 
-  (s->v)++;
-  value_after_op = s->v;
+    (s->v)++;
+    value_after_op = s->v;
 
-  tw_pthread_mutex_unlock (&(s->mutex));
-  tw_pthread_cond_signal (&(s->cond));
+    tw_pthread_mutex_unlock (&(s->mutex));
+    tw_pthread_cond_signal (&(s->cond));
 
-  return (value_after_op);
+    return (value_after_op);
 }
 
 /********************************************************************************
@@ -84,20 +84,20 @@ int semaphore_up (Semaphore * s)
 
 int semaphore_down (Semaphore * s)
 {
-  int         value_after_op;
+    int         value_after_op;
 
-  tw_pthread_mutex_lock (&(s->mutex));
-  while (s->v <= 0)
-  {
-    tw_pthread_cond_wait (&(s->cond), &(s->mutex));
-  }
+    tw_pthread_mutex_lock (&(s->mutex));
+    while (s->v <= 0)
+    {
+        tw_pthread_cond_wait (&(s->cond), &(s->mutex));
+    }
 
-  (s->v)--;
-  value_after_op = s->v;
+    (s->v)--;
+    value_after_op = s->v;
 
-  tw_pthread_mutex_unlock (&(s->mutex));
+    tw_pthread_mutex_unlock (&(s->mutex));
 
-  return (value_after_op);
+    return (value_after_op);
 }
 
 /********************************************************************************
@@ -110,14 +110,14 @@ int semaphore_down (Semaphore * s)
 
 int semaphore_decrement (Semaphore * s)
 {
-  int         value_after_op;
+    int         value_after_op;
 
-  tw_pthread_mutex_lock (&(s->mutex));
-  s->v--;
-  value_after_op = s->v;
-  tw_pthread_mutex_unlock (&(s->mutex));
+    tw_pthread_mutex_lock (&(s->mutex));
+    s->v--;
+    value_after_op = s->v;
+    tw_pthread_mutex_unlock (&(s->mutex));
 
-  return (value_after_op);
+    return (value_after_op);
 }
 
 /********************************************************************************
@@ -132,14 +132,14 @@ int semaphore_decrement (Semaphore * s)
 
 int semaphore_value (Semaphore * s)
 {
-  /* not for sync */
-  int         value_after_op;
+    /* not for sync */
+    int         value_after_op;
 
-  tw_pthread_mutex_lock (&(s->mutex));
-  value_after_op = s->v;
-  tw_pthread_mutex_unlock (&(s->mutex));
+    tw_pthread_mutex_lock (&(s->mutex));
+    value_after_op = s->v;
+    tw_pthread_mutex_unlock (&(s->mutex));
 
-  return (value_after_op);
+    return (value_after_op);
 }
 
 /* -------------------------------------------------------------------- */
@@ -150,42 +150,42 @@ int semaphore_value (Semaphore * s)
 
 int tw_pthread_mutex_unlock (pthread_mutex_t * m)
 {
-  int         return_value;
+    int         return_value;
 
-  if ((return_value = pthread_mutex_unlock (m)) == -1)
-    do_error ("pthread_mutex_unlock");
+    if ((return_value = pthread_mutex_unlock (m)) == -1)
+        do_error ("pthread_mutex_unlock");
 
-  return (return_value);
+    return (return_value);
 }
 
 int tw_pthread_mutex_lock (pthread_mutex_t * m)
 {
-  int         return_value;
+    int         return_value;
 
-  if ((return_value = pthread_mutex_lock (m)) == -1)
-    do_error ("pthread_mutex_lock");
+    if ((return_value = pthread_mutex_lock (m)) == -1)
+        do_error ("pthread_mutex_lock");
 
-  return (return_value);
+    return (return_value);
 }
 
 int tw_pthread_cond_wait (pthread_cond_t * c, pthread_mutex_t * m)
 {
-  int         return_value;
+    int         return_value;
 
-  if ((return_value = pthread_cond_wait (c, m)) == -1)
-    do_error ("pthread_cond_wait");
+    if ((return_value = pthread_cond_wait (c, m)) == -1)
+        do_error ("pthread_cond_wait");
 
-  return (return_value);
+    return (return_value);
 }
 
 int tw_pthread_cond_signal (pthread_cond_t * c)
 {
-  int         return_value;
+    int         return_value;
 
-  if ((return_value = pthread_cond_signal (c)) == -1)
-    do_error ("pthread_cond_signal");
+    if ((return_value = pthread_cond_signal (c)) == -1)
+        do_error ("pthread_cond_signal");
 
-  return (return_value);
+    return (return_value);
 }
 
 
@@ -195,6 +195,6 @@ int tw_pthread_cond_signal (pthread_cond_t * c)
 
 void do_error (char *msg)
 {
-  perror (msg);
-  exit (1);
+    perror (msg);
+    exit (1);
 }

@@ -26,8 +26,8 @@
 
 void initBBQueue(BBQueue *queue)
 {
-  queue->length = 0;
-  queue->first  = NULL;
+    queue->length = 0;
+    queue->first  = NULL;
 };
 
 /********************************************************************************
@@ -36,13 +36,13 @@ void initBBQueue(BBQueue *queue)
 
 void resetBBQueue(BBQueue *queue)
 {
-  while (queue->first != NULL)
-  {
-    BBQueueItem *tmp_item = queue->first;
-    queue->first = queue->first->next;
-    free(tmp_item);
-  }
-  queue->length = 0;
+    while (queue->first != NULL)
+    {
+        BBQueueItem *tmp_item = queue->first;
+        queue->first = queue->first->next;
+        free(tmp_item);
+    }
+    queue->length = 0;
 };
 
 /********************************************************************************
@@ -51,26 +51,26 @@ void resetBBQueue(BBQueue *queue)
 
 void insertItemIntoBBQueue(BBQueue *queue, BBQueueItem *item)
 {
-  if (queue->first == NULL)
-    queue->first = item;
-  else if (queue->first->score >= item->score)
-  {
-    item->next = queue->first;
-    queue->first = item;
-  }
-  else
-  {
-    /***** find place in queue */
+    if (queue->first == NULL)
+        queue->first = item;
+    else if (queue->first->score >= item->score)
+    {
+        item->next = queue->first;
+        queue->first = item;
+    }
+    else
+    {
+        /***** find place in queue */
 
-    BBQueueItem *tmp_queue = queue->first;
+        BBQueueItem *tmp_queue = queue->first;
 
-    while (tmp_queue->next != NULL && tmp_queue->next->score < item->score)
-      tmp_queue = tmp_queue->next;
-    item->next = tmp_queue->next;
-    tmp_queue->next = item;
-  }
+        while (tmp_queue->next != NULL && tmp_queue->next->score < item->score)
+            tmp_queue = tmp_queue->next;
+        item->next = tmp_queue->next;
+        tmp_queue->next = item;
+    }
 
-  queue->length++;
+    queue->length++;
 }
 
 /********************************************************************************
@@ -79,13 +79,13 @@ void insertItemIntoBBQueue(BBQueue *queue, BBQueueItem *item)
 
 void insertIntoBBQueue(BBQueue *queue, int pos, float score, int sample_index)
 {
-  BBQueueItem *new_item = (BBQueueItem *)malloc(sizeof(BBQueueItem));
-  new_item->pos          = pos;
-  new_item->score        = score;
-  new_item->sample_index = sample_index;
-  new_item->next         = NULL;
+    BBQueueItem *new_item = (BBQueueItem *)malloc(sizeof(BBQueueItem));
+    new_item->pos          = pos;
+    new_item->score        = score;
+    new_item->sample_index = sample_index;
+    new_item->next         = NULL;
 
-  insertItemIntoBBQueue(queue, new_item);
+    insertItemIntoBBQueue(queue, new_item);
 }
 
 /********************************************************************************
@@ -94,11 +94,11 @@ void insertIntoBBQueue(BBQueue *queue, int pos, float score, int sample_index)
 
 BBQueueItem *headBBQueue(BBQueue *queue)
 {
-  BBQueueItem *retval = queue->first;
-  queue->first = queue->first->next;
-  queue->length--;
+    BBQueueItem *retval = queue->first;
+    queue->first = queue->first->next;
+    queue->length--;
 
-  return(retval);
+    return(retval);
 }
 
 
