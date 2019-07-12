@@ -356,322 +356,318 @@ int adjustMixerLevels()
     {
         igain_level = 1;
         setIGainLevel(igain_level); /***** set initial levels in mixer */
-    }
-    else
-        goto no_igain;
 
-    /***** dialog header */
+        /***** dialog header */
 
-    mvwaddstr(adjustscr, 1, 2, "Adjust Input Gain Level:");
-    mvwaddseparator(adjustscr, 2, width);
+        mvwaddstr(adjustscr, 1, 2, "Adjust Input Gain Level:");
+        mvwaddseparator(adjustscr, 2, width);
 
-    /***** dialog message */
+        /***** dialog message */
 
-    mvwaddstr(adjustscr, 3, 2, "Please grab your microphone and speak");
-    mvwaddstr(adjustscr, 4, 2, "nonsense at a conversational volume");
-    mvwaddstr(adjustscr, 5, 2, "(speech recognition volume) until I");
-    mvwaddstr(adjustscr, 6, 2, "say stop:");
-    mvwaddstrcntr(adjustscr, 8, width, "Press any key to start ...");
+        mvwaddstr(adjustscr, 3, 2, "Please grab your microphone and speak");
+        mvwaddstr(adjustscr, 4, 2, "nonsense at a conversational volume");
+        mvwaddstr(adjustscr, 5, 2, "(speech recognition volume) until I");
+        mvwaddstr(adjustscr, 6, 2, "say stop:");
+        mvwaddstrcntr(adjustscr, 8, width, "Press any key to start ...");
 
-    wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
-    wrefresh (adjustscr);     /***** refresh the dialog */
-    getch();                  /***** wait for keyboard reaction */
-
-    /***** update dialog */
-
-    mvwaddstr(adjustscr, 8, 2, "Current Gain Level:               ");
-    sprintf(tmp_string, "%d", igain_level);
-    mvwaddstr(adjustscr, 8, 22, tmp_string);
-
-    wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
-    wrefresh (adjustscr);     /***** refresh the dialog */
-
-    count    = 0;
-    max_gain = 0;
-
-    if (openAudio() == AUDIO_ERR)
-    {
-        /*****
-         * if the audio device could not be opened,
-         * show a warning dialog and return to main menu
-         *****/
-
-        /***** empty dialog */
-
-        for (i = 1; i < width-1; i++)
-            mvwaddch(adjustscr, 1, i, ' ');
-        for (i = 1; i < width-1; i++)
-            for (j = 3; j < height-1; j++)
-                mvwaddch(adjustscr, j, i, ' ');
-
-        /***** show header and message */
-
-        mvwaddstr(adjustscr, 1, 2, "Warning!");
-
-        mvwaddstr(adjustscr, 5, 2, "Failed to open sound device!!");
-        mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
-        wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
+        wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
         wrefresh (adjustscr);     /***** refresh the dialog */
         getch();                  /***** wait for keyboard reaction */
 
-        retval = 0;               /***** set return value to ERROR */
-        goto adjustMixerLevelsReturn;
-    }
+        /***** update dialog */
 
-    /***** repeat until the input gain level has been adjusted properly */
+        mvwaddstr(adjustscr, 8, 2, "Current Gain Level:               ");
+        sprintf(tmp_string, "%d", igain_level);
+        mvwaddstr(adjustscr, 8, 22, tmp_string);
 
-    while (1)
-    {
-        int max;          /***** maximum sample value in a sequence of audio samples */
-        int samples = 10; /***** number of blocks to get from the audio device */
+        wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
+        wrefresh (adjustscr);     /***** refresh the dialog */
 
-        count++;
+        count    = 0;
+        max_gain = 0;
 
-        /*****
-         * get the maximum values of 'samples' blocks of data from the sound card
-         * the maximum of these values is stored in 'max'9
-         *****/
-        max = 0;
-        for (i = 0; i < samples; i++)
-        {
-            int value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
-            if (value > max)
-                max = value;
-        }
-
-        /***** max_gain holds the highest maximum sample found */
-
-        if (max > max_gain)
-            max_gain = max;
-
-        if (count == 5) /***** after five iterations, check the value of 'max_gain' */
+        if (openAudio() == AUDIO_ERR)
         {
             /*****
-             * if max_gain is too low (i.e. it is between silence and low_volume)
-             * the input gain level is increased
+             * if the audio device could not be opened,
+             * show a warning dialog and return to main menu
              *****/
-            if (max_gain >= silence * max_sample && max_gain < low_volume * max_sample)
+
+            /***** empty dialog */
+
+            for (i = 1; i < width-1; i++)
+                mvwaddch(adjustscr, 1, i, ' ');
+            for (i = 1; i < width-1; i++)
+                for (j = 3; j < height-1; j++)
+                    mvwaddch(adjustscr, j, i, ' ');
+
+            /***** show header and message */
+
+            mvwaddstr(adjustscr, 1, 2, "Warning!");
+
+            mvwaddstr(adjustscr, 5, 2, "Failed to open sound device!!");
+            mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
+            wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
+            wrefresh (adjustscr);     /***** refresh the dialog */
+            getch();                  /***** wait for keyboard reaction */
+
+            retval = 0;               /***** set return value to ERROR */
+        } else {
+
+            /***** repeat until the input gain level has been adjusted properly */
+
+            while (1)
             {
-                igain_level++;
-                if (igain_level > 99)
-                    igain_level = 99;
-                setIGainLevel(igain_level);
+                int max;          /***** maximum sample value in a sequence of audio samples */
+                int samples = 10; /***** number of blocks to get from the audio device */
 
-                sprintf(tmp_string, "%d", igain_level); /***** update display of igain level */
-                mvwaddstr(adjustscr, 8, 22, tmp_string);
+                count++;
 
-                wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
-                wrefresh (adjustscr);     /***** refresh the dialog */
+                /*****
+                 * get the maximum values of 'samples' blocks of data from the sound card
+                 * the maximum of these values is stored in 'max'9
+                 *****/
+                max = 0;
+                for (i = 0; i < samples; i++)
+                {
+                    int value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
+                    if (value > max)
+                        max = value;
+                }
+
+                /***** max_gain holds the highest maximum sample found */
+
+                if (max > max_gain)
+                    max_gain = max;
+
+                if (count == 5) /***** after five iterations, check the value of 'max_gain' */
+                {
+                    /*****
+                     * if max_gain is too low (i.e. it is between silence and low_volume)
+                     * the input gain level is increased
+                     *****/
+                    if (max_gain >= silence * max_sample && max_gain < low_volume * max_sample)
+                    {
+                        igain_level++;
+                        if (igain_level > 99)
+                            igain_level = 99;
+                        setIGainLevel(igain_level);
+
+                        sprintf(tmp_string, "%d", igain_level); /***** update display of igain level */
+                        mvwaddstr(adjustscr, 8, 22, tmp_string);
+
+                        wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
+                        wrefresh (adjustscr);     /***** refresh the dialog */
+                    }
+                    /*****
+                     * if the level is above 'low_volume'
+                     * we assume that the input gain is high enough and break the current while loop
+                     *****/
+                    else if (max_gain >= low_volume * max_sample)
+                        break;
+
+                    /***** reset count and max_gain */
+
+                    count    = 0;
+                    max_gain = 0;
+                }
             }
-            /*****
-             * if the level is above 'low_volume'
-             * we assume that the input gain is high enough and break the current while loop
-             *****/
-            else if (max_gain >= low_volume * max_sample)
-                break;
+            closeAudio(); /***** disconnect from microphone */
 
-            /***** reset count and max_gain */
+            /***** update dialog window */
 
-            count    = 0;
-            max_gain = 0;
-        }
-    }
-    closeAudio(); /***** disconnect from microphone */
-
-    /***** update dialog window */
-
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(adjustscr, j, i, ' ');
-    mvwaddstrcntr(adjustscr, 5, width, "STOP!!");
-    mvwaddstrcntr(adjustscr, 8, width, "Press any key to continue ...");
-
-    wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
-    wrefresh (adjustscr);     /***** refresh the dialog */
-    getch();                  /***** wait for keyboard reaction */
-
-no_igain:
-
-    count = 0; /***** reset count */
-
-    /***** adjusting microphone level */
-
-    /***** dialog header */
-
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(adjustscr, j, i, ' ');
-    mvwaddstr(adjustscr, 1, 2, "Adjust Microphone Level:");
-
-    /***** dialog message */
-
-    mvwaddstr(adjustscr, 3, 2, "Please grab your microphone and speak");
-    mvwaddstr(adjustscr, 4, 2, "very loudly (laughing loudly is good)");
-    mvwaddstr(adjustscr, 5, 2, "until I say stop:");
-    mvwaddstrcntr(adjustscr, 8, width, "Press any key to start ...");
-
-    wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
-    wrefresh (adjustscr);     /***** refresh the dialog */
-    getch();                  /***** wait for keyboard reaction */
-
-    /***** update dialog */
-
-    mvwaddstr(adjustscr, 8, 2, "Current Microphone Level:               ");
-    sprintf(tmp_string, "%d", mic_level);
-    mvwaddstr(adjustscr, 8, 28, tmp_string);
-
-    wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
-    wrefresh (adjustscr);     /***** refresh the dialog */
-
-    if (openAudio() == AUDIO_ERR)
-    {
-        /*****
-         * if the audio device could not be opened,
-         * show a warning dialog and return to main menu
-         *****/
-
-        /***** empty dialog */
-
-        for (i = 1; i < width-1; i++)
-            mvwaddch(adjustscr, 1, i, ' ');
-        for (i = 1; i < width-1; i++)
-            for (j = 3; j < height-1; j++)
-                mvwaddch(adjustscr, j, i, ' ');
-
-        /***** show header and message */
-
-        mvwaddstr(adjustscr, 1, 2, "Warning!");
-
-        mvwaddstr(adjustscr, 5, 2, "Failed to open sound device!!");
-        mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
-        wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
-        wrefresh (adjustscr);     /***** refresh the dialog */
-        getch();                  /***** wait for keyboard reaction */
-
-        retval = 0;               /***** set return value to ERROR */
-        goto adjustMixerLevelsReturn;
-    }
-
-    /***** repeat until the microphone level has been adjusted properly */
-
-    while (1)
-    {
-        int max;         /***** maximum sample value in a sequence of audio samples */
-        int samples = 4; /***** number of blocks to get from the audio device */
-
-        /*****
-         * get the maximum values of 'samples' blocks of data from the sound card
-         * the maximum of these values is stored in 'max'9
-         *****/
-        max = 0;
-        for (i = 0; i < samples; i++)
-        {
-            int value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
-            if (value > max)
-                max = value;
-        }
-
-        if (max >= high_volume * max_sample)
-        {
-            /*****
-             * if max is too high (i.e. above high_volume)
-             * the microphone level is dereased
-             *****/
-            mic_level -= 1;
-            if (mic_level < 5)
-                mic_level = 5;
-            setMicLevel(mic_level);
-
-            count = 0; /***** reset count */
-
-            sprintf(tmp_string, "%d", mic_level); /***** update display of mic level */
-            mvwaddstr(adjustscr, 8, 28, tmp_string);
+            for (i = 1; i < width-1; i++)
+                for (j = 3; j < height-1; j++)
+                    mvwaddch(adjustscr, j, i, ' ');
+            mvwaddstrcntr(adjustscr, 5, width, "STOP!!");
+            mvwaddstrcntr(adjustscr, 8, width, "Press any key to continue ...");
 
             wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
             wrefresh (adjustscr);     /***** refresh the dialog */
-        }
-        else if (max >= silence * max_sample)
-        {
-            /*****
-             * if there is a signal above silence coming in,
-             * increase count
-             * if count >= a specified constant, we assume that
-             * the microphone level is not too high any more and
-             * thus, break the while loop
-             ****/
-            count++;
+            getch();                  /***** wait for keyboard reaction */
 
-            if (count >= 20)
-                break;
         }
-        else
+
+        count = 0; /***** reset count */
+
+        /***** adjusting microphone level */
+
+        /***** dialog header */
+
+        for (i = 1; i < width-1; i++)
+            for (j = 3; j < height-1; j++)
+                mvwaddch(adjustscr, j, i, ' ');
+        mvwaddstr(adjustscr, 1, 2, "Adjust Microphone Level:");
+
+        /***** dialog message */
+
+        mvwaddstr(adjustscr, 3, 2, "Please grab your microphone and speak");
+        mvwaddstr(adjustscr, 4, 2, "very loudly (laughing loudly is good)");
+        mvwaddstr(adjustscr, 5, 2, "until I say stop:");
+        mvwaddstrcntr(adjustscr, 8, width, "Press any key to start ...");
+
+        wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
+        wrefresh (adjustscr);     /***** refresh the dialog */
+        getch();                  /***** wait for keyboard reaction */
+
+        /***** update dialog */
+
+        mvwaddstr(adjustscr, 8, 2, "Current Microphone Level:               ");
+        sprintf(tmp_string, "%d", mic_level);
+        mvwaddstr(adjustscr, 8, 28, tmp_string);
+
+        wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
+        wrefresh (adjustscr);     /***** refresh the dialog */
+
+        if (openAudio() == AUDIO_ERR)
         {
             /*****
-             * this was a silence frame, decrease count if it is > 0
+             * if the audio device could not be opened,
+             * show a warning dialog and return to main menu
              *****/
-            if (count > 0)
-                count--;
+
+            /***** empty dialog */
+
+            for (i = 1; i < width-1; i++)
+                mvwaddch(adjustscr, 1, i, ' ');
+            for (i = 1; i < width-1; i++)
+                for (j = 3; j < height-1; j++)
+                    mvwaddch(adjustscr, j, i, ' ');
+
+            /***** show header and message */
+
+            mvwaddstr(adjustscr, 1, 2, "Warning!");
+
+            mvwaddstr(adjustscr, 5, 2, "Failed to open sound device!!");
+            mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
+            wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
+            wrefresh (adjustscr);     /***** refresh the dialog */
+            getch();                  /***** wait for keyboard reaction */
+
+            retval = 0;               /***** set return value to ERROR */
+        } else {
+
+            /***** repeat until the microphone level has been adjusted properly */
+
+            while (1)
+            {
+                int max;         /***** maximum sample value in a sequence of audio samples */
+                int samples = 4; /***** number of blocks to get from the audio device */
+
+                /*****
+                 * get the maximum values of 'samples' blocks of data from the sound card
+                 * the maximum of these values is stored in 'max'9
+                 *****/
+                max = 0;
+                for (i = 0; i < samples; i++)
+                {
+                    int value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
+                    if (value > max)
+                        max = value;
+                }
+
+                if (max >= high_volume * max_sample)
+                {
+                    /*****
+                     * if max is too high (i.e. above high_volume)
+                     * the microphone level is dereased
+                     *****/
+                    mic_level -= 1;
+                    if (mic_level < 5)
+                        mic_level = 5;
+                    setMicLevel(mic_level);
+
+                    count = 0; /***** reset count */
+
+                    sprintf(tmp_string, "%d", mic_level); /***** update display of mic level */
+                    mvwaddstr(adjustscr, 8, 28, tmp_string);
+
+                    wmove(adjustscr, 1, 27);  /***** set cursor to an appropriate location */
+                    wrefresh (adjustscr);     /***** refresh the dialog */
+                }
+                else if (max >= silence * max_sample)
+                {
+                    /*****
+                     * if there is a signal above silence coming in,
+                     * increase count
+                     * if count >= a specified constant, we assume that
+                     * the microphone level is not too high any more and
+                     * thus, break the while loop
+                     ****/
+                    count++;
+
+                    if (count >= 20)
+                        break;
+                }
+                else
+                {
+                    /*****
+                     * this was a silence frame, decrease count if it is > 0
+                     *****/
+                    if (count > 0)
+                        count--;
+                }
+            }
+            closeAudio(); /***** disconnect from microphone */
+
+            /***** clear dialog window */
+
+            for (i = 1; i < width-1; i++)
+                mvwaddch(adjustscr, 1, i, ' ');
+            for (i = 1; i < width-1; i++)
+                for (j = 3; j < height-1; j++)
+                    mvwaddch(adjustscr, j, i, ' ');
+
+            /***** check the mixer values, to make sure they look reasonable */
+
+            if (igain_level >= mic_level ||
+                    mic_level < MIN_REASONABLE_MIC_LEVEL ||
+                    igain_level > MAX_REASONABLE_IGAIN_LEVEL)
+            {
+                int pos = 0;
+
+                /***** dialog header */
+
+                mvwaddstr(adjustscr, 1, 2, "Warning!");
+
+                /***** dialog message */
+
+                mvwaddstr(adjustscr, 3, 2, "You have to run this step once again!");
+                mvwaddstr(adjustscr, 4, 2, "The estimated level results don't look");
+                mvwaddstr(adjustscr, 5, 2, "reasonable to me!");
+                if (igain_level >= mic_level || igain_level > MAX_REASONABLE_IGAIN_LEVEL)
+                    mvwaddstr(adjustscr, 6+(pos++), 2, "- Input gain level looks too high!");
+                if (igain_level >= mic_level || mic_level < MIN_REASONABLE_MIC_LEVEL)
+                    mvwaddstr(adjustscr, 6+(pos++), 2, "- Microphone level looks too low?!");
+                mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
+
+                wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
+                wrefresh (adjustscr);     /***** refresh the dialog */
+                getch();                  /***** wait for keyboard reaction */
+
+                retval = 0;
+            }
+            else /***** the mixer values seem ok */
+            {
+                /***** dialog header */
+
+                mvwaddstr(adjustscr, 1, 2, "Success!");
+
+                /***** dialog message */
+
+                mvwaddstrcntr(adjustscr, 4, width, "The mixer levels have been");
+                mvwaddstrcntr(adjustscr, 5, width, "adjusted successfully!");
+                mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
+
+                wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
+                wrefresh (adjustscr);     /***** refresh the dialog */
+                getch();                  /***** wait for keyboard reaction */
+
+                retval = 1; /***** set return value = ok */
+            }
         }
     }
-    closeAudio(); /***** disconnect from microphone */
 
-    /***** clear dialog window */
-
-    for (i = 1; i < width-1; i++)
-        mvwaddch(adjustscr, 1, i, ' ');
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(adjustscr, j, i, ' ');
-
-    /***** check the mixer values, to make sure they look reasonable */
-
-    if (igain_level >= mic_level ||
-            mic_level < MIN_REASONABLE_MIC_LEVEL ||
-            igain_level > MAX_REASONABLE_IGAIN_LEVEL)
-    {
-        int pos = 0;
-
-        /***** dialog header */
-
-        mvwaddstr(adjustscr, 1, 2, "Warning!");
-
-        /***** dialog message */
-
-        mvwaddstr(adjustscr, 3, 2, "You have to run this step once again!");
-        mvwaddstr(adjustscr, 4, 2, "The estimated level results don't look");
-        mvwaddstr(adjustscr, 5, 2, "reasonable to me!");
-        if (igain_level >= mic_level || igain_level > MAX_REASONABLE_IGAIN_LEVEL)
-            mvwaddstr(adjustscr, 6+(pos++), 2, "- Input gain level looks too high!");
-        if (igain_level >= mic_level || mic_level < MIN_REASONABLE_MIC_LEVEL)
-            mvwaddstr(adjustscr, 6+(pos++), 2, "- Microphone level looks too low?!");
-        mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
-
-        wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
-        wrefresh (adjustscr);     /***** refresh the dialog */
-        getch();                  /***** wait for keyboard reaction */
-
-        retval = 0;
-    }
-    else /***** the mixer values seem ok */
-    {
-        /***** dialog header */
-
-        mvwaddstr(adjustscr, 1, 2, "Success!");
-
-        /***** dialog message */
-
-        mvwaddstrcntr(adjustscr, 4, width, "The mixer levels have been");
-        mvwaddstrcntr(adjustscr, 5, width, "adjusted successfully!");
-        mvwaddstrcntr(adjustscr, 8, width, "Press any key to return to menu ...");
-
-        wmove(adjustscr, 1, 11);  /***** set cursor to an appropriate location */
-        wrefresh (adjustscr);     /***** refresh the dialog */
-        getch();                  /***** wait for keyboard reaction */
-
-        retval = 1; /***** set return value = ok */
-    }
-
-adjustMixerLevelsReturn:
     delwin(adjustscr);   /***** delete ncurses dialog window */
     return(retval);
 }
@@ -761,131 +757,130 @@ int calculateThresholds()
         getch();                  /***** wait for keyboard reaction */
 
         retval = 0;               /***** set return value to ERROR */
-        goto calculateThresholdsReturn;
-    }
+    } else {
 
-    /*****
-     * define the silence_level as the average of a specified number
-     * of subsequent block maxima
-     *****/
-    samples           = 40;
-    silence_level_tmp = 0;
-    silence_max   = 0;
-    for (i = 0; i < samples; i++)
-    {
-        int value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
-        silence_level_tmp += value;
-        if (value > silence_max)
-            silence_max = value;
-    }
-    silence_level_tmp /= samples;
-    silence_level = silence_level_tmp;
+        /*****
+         * define the silence_level as the average of a specified number
+         * of subsequent block maxima
+         *****/
+        samples           = 40;
+        silence_level_tmp = 0;
+        silence_max   = 0;
+        for (i = 0; i < samples; i++)
+        {
+            int value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
+            silence_level_tmp += value;
+            if (value > silence_max)
+                silence_max = value;
+        }
+        silence_level_tmp /= samples;
+        silence_level = silence_level_tmp;
 
-    /***** rec_level and stop_level */
+        /***** rec_level and stop_level */
 
-    /***** clear dialog */
+        /***** clear dialog */
 
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(threshscr, j, i, ' ');
+        for (i = 1; i < width-1; i++)
+            for (j = 3; j < height-1; j++)
+                mvwaddch(threshscr, j, i, ' ');
 
-    /***** update dialog */
+        /***** update dialog */
 
-    mvwaddstr(threshscr, 3, 2, "Now, I'll define the thresholds at which");
-    mvwaddstr(threshscr, 4, 2, "to start/stop recording. Please talk");
-    mvwaddstr(threshscr, 5, 2, "at a conversational volume (speech");
-    mvwaddstr(threshscr, 6, 2, "recognition volume) until I say stop!");
-    mvwaddstrcntr(threshscr, 8, width, "Press any key to start ...");
+        mvwaddstr(threshscr, 3, 2, "Now, I'll define the thresholds at which");
+        mvwaddstr(threshscr, 4, 2, "to start/stop recording. Please talk");
+        mvwaddstr(threshscr, 5, 2, "at a conversational volume (speech");
+        mvwaddstr(threshscr, 6, 2, "recognition volume) until I say stop!");
+        mvwaddstrcntr(threshscr, 8, width, "Press any key to start ...");
 
-    wmove(threshscr, 1, 24);  /***** set cursor to an appropriate location */
-    wrefresh (threshscr);     /***** refresh the dialog */
-    getch();                  /***** wait for keyboard reaction */
-
-    /***** clear dialog */
-
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(threshscr, j, i, ' ');
-
-    mvwaddstrcntr(threshscr, 5, width, "keep on talking ..."); /***** update dialog */
-    wmove(threshscr, 1, 24);  /***** set cursor to an appropriate location */
-    wrefresh (threshscr);     /***** refresh the dialog */
-
-    /***** get maximum value 'max' of a prespecified number of subsequent block maxima */
-
-    samples = 80;
-    for (i = 0; i < samples; i++)
-    {
-        value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
-        if (value > max)
-            max = value;
-    }
-
-    /***** set the rec_level  to be the average of silence_level and 'max' */
-    /***** set the stop_level to be three quarters of silence_level plus one quarter of 'max' */
-
-    rec_level =  (silence_level + max) / 2;
-    stop_level = (3*silence_level + max) / 4;
-
-    closeAudio(); /***** disconnect from microphone */
-
-    /***** clear dialog */
-
-    for (i = 1; i < width-1; i++)
-        mvwaddch(threshscr, 1, i, ' ');
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(threshscr, j, i, ' ');
-
-    /***** check that the thresholds are reasonable */
-
-    if (silence_level >= stop_level ||
-            silence_max >= stop_level    ||
-            silence_level < 0 || stop_level < 0 || rec_level < 0)
-    {
-        /***** dialog header */
-
-        mvwaddstr(threshscr, 1, 2, "Warning!");
-
-        /***** dialog message */
-
-        mvwaddstr(threshscr, 4, 2, "You have to run this step once again!");
-        mvwaddstr(threshscr, 5, 2, "The calculated thresholds don't look");
-        mvwaddstr(threshscr, 6, 2, "reasonable to me!");
-        mvwaddstrcntr(threshscr, 8, width, "Press any key to return to menu ...");
-        wmove(threshscr, 1, 11);  /***** set cursor to an appropriate location */
+        wmove(threshscr, 1, 24);  /***** set cursor to an appropriate location */
         wrefresh (threshscr);     /***** refresh the dialog */
         getch();                  /***** wait for keyboard reaction */
 
-        retval = 0;
-    }
-    else /***** the values seem ok */
-    {
-        /***** dialog header */
+        /***** clear dialog */
 
-        mvwaddstr(threshscr, 1, 2, "Success!");
+        for (i = 1; i < width-1; i++)
+            for (j = 3; j < height-1; j++)
+                mvwaddch(threshscr, j, i, ' ');
 
-        /***** dialog message */
-
-        mvwaddstr(threshscr, 4, 2, "You may stop talking now! The thresholds");
-        mvwaddstr(threshscr, 5, 2, "have been defined!");
-
-        /* Debugging stuff:
-           mvwaddint(threshscr, 6, 2, silence_level);
-           mvwaddint(threshscr, 6,10, stop_level);
-           mvwaddint(threshscr, 6,20, rec_level);
-           */
-
-        mvwaddstrcntr(threshscr, 8, width, "Press any key to return to menu ...");
-
-        wmove(threshscr, 1, 11);  /***** set cursor to an appropriate location */
+        mvwaddstrcntr(threshscr, 5, width, "keep on talking ..."); /***** update dialog */
+        wmove(threshscr, 1, 24);  /***** set cursor to an appropriate location */
         wrefresh (threshscr);     /***** refresh the dialog */
-        getch();                  /***** wait for keyboard reaction */
 
-        retval = 1; /***** set return value = ok */
+        /***** get maximum value 'max' of a prespecified number of subsequent block maxima */
+
+        samples = 80;
+        for (i = 0; i < samples; i++)
+        {
+            value = getBlockMax(); /***** should check for value == -1 (case of an error!) */
+            if (value > max)
+                max = value;
+        }
+
+        /***** set the rec_level  to be the average of silence_level and 'max' */
+        /***** set the stop_level to be three quarters of silence_level plus one quarter of 'max' */
+
+        rec_level =  (silence_level + max) / 2;
+        stop_level = (3*silence_level + max) / 4;
+
+        closeAudio(); /***** disconnect from microphone */
+
+        /***** clear dialog */
+
+        for (i = 1; i < width-1; i++)
+            mvwaddch(threshscr, 1, i, ' ');
+        for (i = 1; i < width-1; i++)
+            for (j = 3; j < height-1; j++)
+                mvwaddch(threshscr, j, i, ' ');
+
+        /***** check that the thresholds are reasonable */
+
+        if (silence_level >= stop_level ||
+                silence_max >= stop_level    ||
+                silence_level < 0 || stop_level < 0 || rec_level < 0)
+        {
+            /***** dialog header */
+
+            mvwaddstr(threshscr, 1, 2, "Warning!");
+
+            /***** dialog message */
+
+            mvwaddstr(threshscr, 4, 2, "You have to run this step once again!");
+            mvwaddstr(threshscr, 5, 2, "The calculated thresholds don't look");
+            mvwaddstr(threshscr, 6, 2, "reasonable to me!");
+            mvwaddstrcntr(threshscr, 8, width, "Press any key to return to menu ...");
+            wmove(threshscr, 1, 11);  /***** set cursor to an appropriate location */
+            wrefresh (threshscr);     /***** refresh the dialog */
+            getch();                  /***** wait for keyboard reaction */
+
+            retval = 0;
+        }
+        else /***** the values seem ok */
+        {
+            /***** dialog header */
+
+            mvwaddstr(threshscr, 1, 2, "Success!");
+
+            /***** dialog message */
+
+            mvwaddstr(threshscr, 4, 2, "You may stop talking now! The thresholds");
+            mvwaddstr(threshscr, 5, 2, "have been defined!");
+
+            /* Debugging stuff:
+               mvwaddint(threshscr, 6, 2, silence_level);
+               mvwaddint(threshscr, 6,10, stop_level);
+               mvwaddint(threshscr, 6,20, rec_level);
+               */
+
+            mvwaddstrcntr(threshscr, 8, width, "Press any key to return to menu ...");
+
+            wmove(threshscr, 1, 11);  /***** set cursor to an appropriate location */
+            wrefresh (threshscr);     /***** refresh the dialog */
+            getch();                  /***** wait for keyboard reaction */
+
+            retval = 1; /***** set return value = ok */
+        }
     }
 
-calculateThresholdsReturn:
     delwin(threshscr);   /***** delete ncurses dialog window */
     return(retval);
 }
@@ -967,59 +962,58 @@ int estimateChannelMean()
         getch();                   /***** wait for keyboard reaction */
 
         retval = 0;                /***** set return value to ERROR */
-        goto estimateChannelMeanReturn;
+    } else {
+
+        result = calculateChannelMean(); /***** calculate the characteristics of the recording channel */
+
+        closeAudio(); /***** disconnect from the microphone */
+
+        /***** clear dialog */
+
+        for (i = 1; i < width-1; i++)
+            mvwaddch(channelscr, 1, i, ' ');
+        for (i = 1; i < width-1; i++)
+            for (j = 3; j < height-1; j++)
+                mvwaddch(channelscr, j, i, ' ');
+
+        if (result == AUDIO_ERR)
+        {
+            /***** if an error occurred during the calculation of the channel mean ... */
+
+            retval = 0; /***** set return value to ERROR */
+
+            /***** dialog header and message */
+
+            mvwaddstr(channelscr, 1, 2, "Error!");
+
+            mvwaddstr(channelscr, 3, 2, "I didn't manage to estimate the channel");
+            mvwaddstr(channelscr, 4, 2, "characteristics for some unknown reason!");
+            mvwaddstr(channelscr, 5, 2, "Make sure that no application uses the");
+            mvwaddstr(channelscr, 6, 2, "sound card and then try again!");
+            mvwaddstrcntr(channelscr, 8, width, "Press any key to return to menu ...");
+
+            wmove(channelscr, 1, 9);  /***** set cursor to an appropriate location */
+            wrefresh (channelscr);     /***** refresh the dialog */
+            getch();                  /***** wait for keyboard reaction */
+        }
+        else /***** channel mean calculation was ok */
+        {
+            retval = 1; /***** set return value to ok */
+
+            /***** dialog header and message */
+
+            mvwaddstr(channelscr, 1, 2, "Success!");
+
+            mvwaddstr(channelscr, 4, 2, "You may stop talking now! The channel");
+            mvwaddstr(channelscr, 5, 2, "characteristics have been estimated!");
+            mvwaddstrcntr(channelscr, 8, width, "Press any key to return to menu ...");
+
+            wmove(channelscr, 1, 11);  /***** set cursor to an appropriate location */
+            wrefresh (channelscr);     /***** refresh the dialog */
+            getch();                  /***** wait for keyboard reaction */
+        }
     }
 
-    result = calculateChannelMean(); /***** calculate the characteristics of the recording channel */
-
-    closeAudio(); /***** disconnect from the microphone */
-
-    /***** clear dialog */
-
-    for (i = 1; i < width-1; i++)
-        mvwaddch(channelscr, 1, i, ' ');
-    for (i = 1; i < width-1; i++)
-        for (j = 3; j < height-1; j++)
-            mvwaddch(channelscr, j, i, ' ');
-
-    if (result == AUDIO_ERR)
-    {
-        /***** if an error occurred during the calculation of the channel mean ... */
-
-        retval = 0; /***** set return value to ERROR */
-
-        /***** dialog header and message */
-
-        mvwaddstr(channelscr, 1, 2, "Error!");
-
-        mvwaddstr(channelscr, 3, 2, "I didn't manage to estimate the channel");
-        mvwaddstr(channelscr, 4, 2, "characteristics for some unknown reason!");
-        mvwaddstr(channelscr, 5, 2, "Make sure that no application uses the");
-        mvwaddstr(channelscr, 6, 2, "sound card and then try again!");
-        mvwaddstrcntr(channelscr, 8, width, "Press any key to return to menu ...");
-
-        wmove(channelscr, 1, 9);  /***** set cursor to an appropriate location */
-        wrefresh (channelscr);     /***** refresh the dialog */
-        getch();                  /***** wait for keyboard reaction */
-    }
-    else /***** channel mean calculation was ok */
-    {
-        retval = 1; /***** set return value to ok */
-
-        /***** dialog header and message */
-
-        mvwaddstr(channelscr, 1, 2, "Success!");
-
-        mvwaddstr(channelscr, 4, 2, "You may stop talking now! The channel");
-        mvwaddstr(channelscr, 5, 2, "characteristics have been estimated!");
-        mvwaddstrcntr(channelscr, 8, width, "Press any key to return to menu ...");
-
-        wmove(channelscr, 1, 11);  /***** set cursor to an appropriate location */
-        wrefresh (channelscr);     /***** refresh the dialog */
-        getch();                  /***** wait for keyboard reaction */
-    }
-
-estimateChannelMeanReturn:
     delwin(channelscr);   /***** delete ncurses dialog window */
     return(retval);
 }
@@ -1078,15 +1072,6 @@ int saveConfiguration(int autohome)
 
     /***** retrieve home directory */
 
-    fprintf(stderr, "Couldn't init the only available audio device: \n");
-    fprintf(stderr, "Mixer Device    = %s\n", getMixer());
-    fprintf(stderr, "Audio Device    = %s\n", getAudio());
-    fprintf(stderr, "Mic Level       = %d\n", mic_level);
-    fprintf(stderr, "IGain Level     = %d\n", igain_level);
-    fprintf(stderr, "Record Level    = %d\n", rec_level);
-    fprintf(stderr, "Stop Level      = %d\n", stop_level);
-    fprintf(stderr, "Silence Level   = %d\n", silence_level);
-
     home = getenv("HOME");
     if (home != NULL)
     {
@@ -1144,6 +1129,15 @@ int saveConfiguration(int autohome)
             wrefresh (savescr);     /***** refresh the dialog */
             getch();                /***** wait for keyboard reaction */
         }
+    } else {
+        fprintf(stderr, "Couldn't init the only available audio device: \n");
+        fprintf(stderr, "Mixer Device    = %s\n", getMixer());
+        fprintf(stderr, "Audio Device    = %s\n", getAudio());
+        fprintf(stderr, "Mic Level       = %d\n", mic_level);
+        fprintf(stderr, "IGain Level     = %d\n", igain_level);
+        fprintf(stderr, "Record Level    = %d\n", rec_level);
+        fprintf(stderr, "Stop Level      = %d\n", stop_level);
+        fprintf(stderr, "Silence Level   = %d\n", silence_level);
     }
 
     /***** config_file = config_dir+"config" */
@@ -1260,9 +1254,9 @@ int main(int argc, char *argv[])
         printf("          -a    enable auto search mixer\n");
         printf("          -d    enable search config in home\n");
         printf("          -h    this help\n");
-        return 0;       
+        return 0;
     }
-    
+
     /*****
      * boolean value indicates when to break main loop
      * (and thus finish this configuration tool)
