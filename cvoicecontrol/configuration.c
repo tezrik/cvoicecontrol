@@ -19,6 +19,7 @@
 #include<stdlib.h>
 #include<string.h>
 
+#include "config.h"
 #include "configuration.h"
 
 #include "audio.h"
@@ -89,7 +90,7 @@ int loadConfiguration(int automix)
     char *home = getenv("HOME");
     char *config_file;
     FILE *f;
-    char *config_file_tail = "/.config/cvoicecontrol";
+    char *config_file_tail = VC_CONFIG_PATHFILE;
 
     if (home == NULL)
     {

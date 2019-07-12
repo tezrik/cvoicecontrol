@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "config.h"
 #include "microphone_config.h"
 
 #include "mixer.h"
@@ -1054,7 +1055,7 @@ int saveConfiguration(int autohome)
     /***** dialog message */
 
     mvwaddstr(savescr, 4, 2, "Your configuration will be saved to");
-    mvwaddstrcntr(savescr, 6, width, "~/.config/cvoicecontrol");
+    mvwaddstrcntr(savescr, 6, width, VC_CONFIG_HOMEPATHFILE);
     mvwaddstrcntr(savescr, 8, width, "Press any key to proceed ...");
 
     wmove(savescr, 1, 22);  /***** set cursor to an appropriate location */
@@ -1079,9 +1080,9 @@ int saveConfiguration(int autohome)
 
         /***** make sure the config_dir "~/.config/" exists */
 
-        config_dir = malloc(strlen(home) + strlen("/.config/") + 1);
+        config_dir = malloc(strlen(home) + strlen(VC_CONFIG_PATH) + 1);
         strcpy(config_dir, home);
-        strcat(config_dir, "/.config/");
+        strcat(config_dir, VC_CONFIG_PATH);
 
         if (autohome)
         {
@@ -1095,8 +1096,8 @@ int saveConfiguration(int autohome)
                 if ((f = fopen(config_dir, "r")) == NULL)
                 {
                     free(config_dir);
-                    config_dir = malloc(strlen("/tmp/") + 1);
-                    strcpy(config_dir, "/tmp/");
+                    config_dir = malloc(strlen(VC_TMP_PATH) + 1);
+                    strcpy(config_dir, VC_TMP_PATH);
                 }
 
                 free(command);
@@ -1110,8 +1111,8 @@ int saveConfiguration(int autohome)
     {
         if (autohome)
         {
-            config_dir = malloc(strlen("/tmp/") + 1);
-            strcpy(config_dir, "/tmp/");
+            config_dir = malloc(strlen(VC_TMP_PATH) + 1);
+            strcpy(config_dir, VC_TMP_PATH);
         }
     }
 
@@ -1119,7 +1120,7 @@ int saveConfiguration(int autohome)
     {
         /***** tell user if home directory couldn't be retrieved and /tmp/ is used instead */
 
-        if (strcmp(config_dir, "/tmp/") == 0)
+        if (strcmp(config_dir, VC_TMP_PATH) == 0)
         {
             mvwaddstr(savescr, 4, 2, "Failed to retrieve your home directory,");
             mvwaddstr(savescr, 5, 2, "please contact your local system admin!");
@@ -1142,9 +1143,9 @@ int saveConfiguration(int autohome)
 
     /***** config_file = config_dir+"config" */
 
-    config_file = malloc(strlen(config_dir) + strlen("cvoicecontrol") + 1);
+    config_file = malloc(strlen(config_dir) + strlen(VC_CONFIG_FILE) + 1);
     strcpy(config_file, config_dir);
-    strcat(config_file, "cvoicecontrol");
+    strcat(config_file, VC_CONFIG_FILE);
     free (config_dir);
 
     if ((f = fopen(config_file, "w")) == NULL) /***** failed to write config file */

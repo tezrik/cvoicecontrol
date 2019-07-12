@@ -13,6 +13,6 @@ cvoicecontrol_model_editor_LDADD   = -lm ${LIBNCURSES}
 
 SUBDIRS = docs
 
-EXTRA_DIST = audio.c audio.h bb_queue.c bb_queue.h configuration.c configuration.h keypressed.c keypressed.h microphone_config.c microphone_config.h mixer.c mixer.h model.c model.h model_editor.c model_editor.h ncurses_tools.c ncurses_tools.h preprocess.c preprocess.h queue.h realfftf.c realfftf.h score.c score.h semaphore.c semaphore.h cvoicecontrol.c cvoicecontrol.h
+EXTRA_DIST = audio.c audio.h bb_queue.c bb_queue.h config.h configuration.c configuration.h keypressed.c keypressed.h microphone_config.c microphone_config.h mixer.c mixer.h model.c model.h model_editor.c model_editor.h ncurses_tools.c ncurses_tools.h preprocess.c preprocess.h queue.h realfftf.c realfftf.h score.c score.h semaphore.c semaphore.h cvoicecontrol.c cvoicecontrol.h
 
 ####### kdevelop will overwrite this part!!! (end)############
