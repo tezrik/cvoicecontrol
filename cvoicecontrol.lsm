@@ -1,12 +1,12 @@
 Begin3
-Title:          CVoiceControl 
-Version:        0.9alpha
-Entered-date:   21FEB2000
+Title:          CVoiceControl
+Version:        0.9
+Entered-date:   12JUL2012
 Description:    Simple speech recognizer
 Keywords:       speech recognition voicecontrol cvoicecontrol
 Author:         Daniel Kiecza <daniel@kiecza.de> 
 Maintained-by:  Daniel Kiecza <daniel@kiecza.de> 
-Primary-site:   	        
+Primary-site:  
 Home-page:      http://www.kiecza.de/daniel/linux/
 Original-site:  
 Platforms:      Linux

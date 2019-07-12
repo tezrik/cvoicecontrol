@@ -1,6 +1,6 @@
 /***************************************************************************
                           preprocess.h  -  Preprocessing of a wave file for
-                          								 speech recognition
+                                                         speech recognition
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -16,8 +16,12 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef PREPROCESS_H
-#define PREPROCESS_H
+#ifndef CVC_PREPROCESS_H
+#define CVC_PREPROCESS_H
+
+#include <math.h>
+
+#include "realfftf.h"
 
 /********************************************************************************
  * fft_size        Size of short-time window
@@ -83,4 +87,4 @@ int  initPreprocess();
 int  preprocessFrame(float *frame, float *result);
 void endPreprocess();
 
-#endif
+#endif //CVC_PREPROCESS_H//

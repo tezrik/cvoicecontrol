@@ -17,41 +17,7 @@
 
 #define MAIN_C
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include <math.h>
-#include <float.h>
-
-#include <pthread.h>
-
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-
-#include <sys/time.h>
-#include <sys/types.h>
-#include <sys/soundcard.h>
-
-#ifdef _AIX
-#include <sys/select.h>
-#endif
-
 #include "cvoicecontrol.h"
-
-#include "model.h"
-#include "configuration.h"
-
-#include "queue.h"
-#include "semaphore.h"
-
-#include "score.h"
-#include "bb_queue.h"
-
-#include "audio.h"
-#include "mixer.h"
-#include "preprocess.h"
 
 Model *model; /***** speaker model */
 
@@ -278,7 +244,7 @@ int main(int argc, char *argv[])
         printf("                the recognized speaker model item. This feature is provided to\n");
         printf("                allow for speech prompts in shell scripts.\n");
         printf("          -h    this help\n");
-        return 0;       
+        return 0;
     }
     /***** thread variables */
 

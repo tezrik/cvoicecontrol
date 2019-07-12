@@ -15,8 +15,19 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MIXER_H
-#define MIXER_H
+#ifndef CVC_MIXER_H
+#define CVC_MIXER_H
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/time.h>
+#include <sys/ioctl.h>
+#include <sys/soundcard.h>
+#include <string.h>
+#include <math.h>
+#include <stdio.h>
+#include <glob.h>
 
 typedef struct
 {
@@ -40,4 +51,4 @@ int setMicLevel(int level);
 int mic_level;
 int igain_level;
 
-#endif
+#endif //CVC_MIXER_H//

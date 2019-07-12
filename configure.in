@@ -3,7 +3,7 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(cvoicecontrol,0.9alpha)
+AM_INIT_AUTOMAKE(cvoicecontrol,0.9)
 
 dnl Checks for programs.
 AC_PROG_CC

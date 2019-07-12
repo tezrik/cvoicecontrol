@@ -1,6 +1,6 @@
 /***************************************************************************
                           score.h  -  data structure to handle recognition
-                          						results
+                                                results
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -16,8 +16,15 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SCORE_H
-#define SCORE_H
+#ifndef CVC_SCORE_H
+#define CVC_SCORE_H
+
+#include <stdlib.h>
+
+/*
+# include <sys/types.h>
+# include <unistd.h>
+*/
 
 #include "model.h"
 
@@ -48,5 +55,4 @@ void insertInScoreQueue(ScoreQueue *queue, float score, int ref_index);
 
 int getResultID(ScoreQueue *queue);
 
-#endif
-
+#endif //CVC_SCORE_H//

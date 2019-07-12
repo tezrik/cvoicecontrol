@@ -15,8 +15,22 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MODEL_EDITOR_H
-#define MODEL_EDITOR_H
+#ifndef CVC_MODEL_EDITOR_H
+#define CVC_MODEL_EDITOR_H
+
+#include <ncurses.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
+#include "configuration.h"
+#include "model.h"
+#include "mixer.h"
+#include "audio.h"
+#include "preprocess.h"
+#include "ncurses_tools.h"
 
 enum state {inactive, active};
 
@@ -24,4 +38,4 @@ enum state {inactive, active};
 
 #define MIN_NR_SAMPLES_PER_ITEM 4
 
-#endif
+#endif //CVC_MODEL_EDITOR_H//

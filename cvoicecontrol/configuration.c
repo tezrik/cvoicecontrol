@@ -15,18 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-
-#include "config.h"
 #include "configuration.h"
-
-#include "audio.h"
-#include "mixer.h"
-#include "preprocess.h"
-
-#include "cvoicecontrol.h"
 
 /********************************************************************************
  * is the string empty? (i.e. does it only contain spaces, tabs and newline?)
@@ -90,7 +79,7 @@ int loadConfiguration(int automix)
     char *home = getenv("HOME");
     char *config_file;
     FILE *f;
-    char *config_file_tail = VC_CONFIG_PATHFILE;
+    char *config_file_tail = CVC_CONFIG_PATHFILE;
 
     if (home == NULL)
     {
@@ -207,3 +196,73 @@ int loadConfiguration(int automix)
 
     return 1;
 }
+
+int saveConfiguration(int autohome)
+{
+    char *home;        /***** config file related variables */
+    char *config_dir;
+    char *config_file;
+    FILE *f;
+
+    int i, retval = 0;  /***** return value */
+
+    home = getenv("HOME");
+    if (home != NULL)
+    {
+        FILE *f;
+
+        /***** make sure the config_dir "~/.config/" exists */
+
+        config_dir = malloc(strlen(home) + strlen(CVC_CONFIG_PATH) + 1);
+        strcpy(config_dir, home);
+        strcat(config_dir, CVC_CONFIG_PATH);
+
+        if (autohome)
+        {
+            if ((f = fopen(config_dir, "r")) == NULL)
+            {
+                char *command = malloc(strlen("mkdir ") + strlen(config_dir) + 1);
+                strcpy(command, "mkdir ");
+                strcat(command, config_dir);
+                system(command);
+
+                free(command);
+            }
+            fclose(f);
+
+            free(home);
+        }
+
+        /***** config_file = config_dir+"config" */
+
+        config_file = malloc(strlen(config_dir) + strlen(CVC_CONFIG_FILE) + 1);
+        strcpy(config_file, config_dir);
+        strcat(config_file, CVC_CONFIG_FILE);
+        free (config_dir);
+    } else {
+        config_file = malloc(strlen(CVC_CONFIG_FILE) + 1);
+        strcpy(config_file, CVC_CONFIG_FILE);
+    }
+
+	retval = 1;
+    if ((f = fopen(config_file, "w")) == NULL) retval = 0;
+    if (retval == 0) f = stderr;
+
+    /***** output configuration information to config file */
+    fprintf(f, "Mixer Device    = %s\n", getMixer());
+    fprintf(f, "Audio Device    = %s\n", getAudio());
+    fprintf(f, "Mic Level       = %d\n", mic_level);
+    fprintf(f, "IGain Level     = %d\n", igain_level);
+    fprintf(f, "Record Level    = %d\n", rec_level);
+    fprintf(f, "Stop Level      = %d\n", stop_level);
+    fprintf(f, "Silence Level   = %d\n", silence_level);
+    fprintf(f, "Channel Mean    =");
+    for (i = 0; i < FEAT_VEC_SIZE; i++)
+        fprintf(f, " %6.5f", channel_mean[i]);
+    fprintf(f, "\n");
+    if (retval != 0) fclose(f);
+
+    free(config_file);
+    return(retval);
+}
+

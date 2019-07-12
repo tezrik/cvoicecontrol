@@ -1,6 +1,6 @@
 /***************************************************************************
                           keypressed.c  -  handle asynchronous keyboard
-                          								 input
+                                                         input
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -15,16 +15,6 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
-
-#include <stdlib.h>
-#include <stdio.h>
-
-#include <termios.h>
-#include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#include <sys/time.h>
 
 #include "keypressed.h"
 

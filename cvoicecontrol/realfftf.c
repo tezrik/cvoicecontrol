@@ -15,10 +15,6 @@
 *        Input is in normal order.
 ********************************************************************************/
 
-#include <math.h>
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "realfftf.h"
 
 int *bit_reversed;

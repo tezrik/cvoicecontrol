@@ -1,6 +1,6 @@
 /***************************************************************************
                           bb_queue.h  -  queue for branch and bound
-                          							 recognition method
+                                                     recognition method
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -16,8 +16,10 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef BB_QUEUE_H
-#define BB_QUEUE_H
+#ifndef CVC_BB_QUEUE_H
+#define CVC_BB_QUEUE_H
+
+#include <stdlib.h>
 
 /*****
   a queue needed for branchNbound decoding
@@ -45,5 +47,5 @@ void insertItemIntoBBQueue(BBQueue *queue, BBQueueItem *item);
 void insertIntoBBQueue(BBQueue *queue, int pos, float score, int sample_index);
 BBQueueItem *headBBQueue(BBQueue *queue);
 
-#endif
+#endif //CVC_BB_QUEUE_H//
 

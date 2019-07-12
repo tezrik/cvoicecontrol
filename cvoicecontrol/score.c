@@ -1,6 +1,6 @@
 /***************************************************************************
                           score.c  -  data structure to handle recognition
-                          						results
+                                                results
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -17,13 +17,6 @@
  ***************************************************************************/
 
 #include "score.h"
-
-#include <stdlib.h>
-
-/*
-# include <sys/types.h>
-# include <unistd.h>
-*/
 
 /********************************************************************************
  * initialize the score queue

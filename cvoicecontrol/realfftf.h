@@ -15,8 +15,12 @@
  *        Input is in normal order.
  ********************************************************************************/
 
-#ifndef REALFFTF_H
-#define REALFFTF_H
+#ifndef CVC_REALFFTF_H
+#define CVC_REALFFTF_H
+
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 typedef float fft_type;
 
@@ -26,4 +30,4 @@ void initialize_FFT(int);
 void end_FFT(void);
 void real_FFT(fft_type *);
 
-#endif
+#endif //CVC_REALFFTF_H//

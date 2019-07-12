@@ -1,6 +1,6 @@
 /***************************************************************************
                           bb_queue.c  -  queue for branch and bound
-                          							 recognition method
+                                                     recognition method
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -17,8 +17,6 @@
  ***************************************************************************/
 
 #include "bb_queue.h"
-
-#include <stdlib.h>
 
 /********************************************************************************
  * initialize queue

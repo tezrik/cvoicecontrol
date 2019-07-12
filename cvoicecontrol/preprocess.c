@@ -1,6 +1,6 @@
 /***************************************************************************
                           preprocess.c  -  Preprocessing of a wave file for
-                          	           speech recognition
+                                       speech recognition
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -16,9 +16,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#include<math.h>
-
-#include "realfftf.h"
 #include "preprocess.h"
 
 int i,j; /***** counter variables */

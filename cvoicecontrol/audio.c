@@ -15,20 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <sys/soundcard.h>
-#include <string.h>
-#include <stdio.h>
-#include <glob.h>
-#include <math.h>
-
 #include "audio.h"
-#include "preprocess.h"
-#include "keypressed.h"
 
 int is_open = 0;
 

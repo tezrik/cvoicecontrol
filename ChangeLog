@@ -1,0 +1,13 @@
+CVoiceControl
+
+0.9 (2019-07-12) <zvezdochiot>
+
+    Options version (for new soundsystem)
+    * Restruct configuration
+    * Remove labels
+    * Added options and help
+    * Auto search /dev/mixer as option
+
+0.9alpha (2000-02-21) <Daniel Kiecza>
+
+    Author version (alpha)

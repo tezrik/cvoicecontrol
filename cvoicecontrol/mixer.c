@@ -15,17 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-#include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <sys/soundcard.h>
-#include <string.h>
-#include <math.h>
-#include <stdio.h>
-#include <glob.h>
-
 #include "mixer.h"
 
 char *dev_mixer = NULL;

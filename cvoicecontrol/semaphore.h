@@ -25,8 +25,8 @@
 *
 \****************************************************************************/
 
-#ifndef SEMAPHORE_H
-#define SEMAPHORE_H
+#ifndef CVC_SEMAPHORE_H
+#define CVC_SEMAPHORE_H
 
 #include <pthread.h>
 #include <stdio.h>
@@ -54,4 +54,4 @@ int         tw_pthread_mutex_unlock (pthread_mutex_t * m);
 int         tw_pthread_mutex_lock (pthread_mutex_t * m);
 void        do_error (char *msg);
 
-#endif
+#endif //CVC_SEMAPHORE_H//

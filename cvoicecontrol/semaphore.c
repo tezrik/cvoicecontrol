@@ -188,7 +188,6 @@ int tw_pthread_cond_signal (pthread_cond_t * c)
     return (return_value);
 }
 
-
 /********************************************************************************
  * function just prints an error message and exits
  ********************************************************************************/

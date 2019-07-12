@@ -15,8 +15,35 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef CVOICECONTROL_H
-#define CVOICECONTROL_H
+#ifndef CVC_CVOICECONTROL_H
+#define CVC_CVOICECONTROL_H
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <float.h>
+#include <pthread.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/soundcard.h>
+
+#ifdef _AIX
+#include <sys/select.h>
+#endif
+
+#include "model.h"
+#include "configuration.h"
+#include "semaphore.h"
+#include "score.h"
+#include "bb_queue.h"
+#include "audio.h"
+#include "mixer.h"
+#include "preprocess.h"
+#include "queue.h"
 
 /********************************************************************************
  * Symmetric Sahoe&Chiba warping function:
@@ -152,4 +179,4 @@ float float_max;
  * prefetch_pos    current position/box in buffer
  */
 
-#endif
+#endif //CVC_CVOICECONTROL_H//

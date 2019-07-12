@@ -15,8 +15,22 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef AUDIO_H
-#define AUDIO_H
+#ifndef CVC_AUDIO_H
+#define CVC_AUDIO_H
+
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/time.h>
+#include <sys/ioctl.h>
+#include <sys/soundcard.h>
+#include <string.h>
+#include <stdio.h>
+#include <glob.h>
+#include <math.h>
+
+#include "preprocess.h"
+#include "keypressed.h"
 
 #define CHANNELS  1
 #define RATE      16000
@@ -67,4 +81,4 @@ int calculateChannelMean();
 const float *getChannelMean();
 int closeAudio();
 
-#endif
+#endif //CVC_AUDIO_H//

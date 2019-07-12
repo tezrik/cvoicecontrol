@@ -1,6 +1,6 @@
 /***************************************************************************
                           ncurses_tools.c  -  stuff to simplify the use of
-                          										the ncurses library
+                                                                the ncurses library
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -24,11 +24,6 @@
  * Copyright (C) 1998, 1999 Adam Rogoyski
  * released under the GNU General Public License
  ********************************************************************************/
-
-#include <ncurses.h>
-
-#include <stdlib.h>
-#include <string.h>
 
 #include "ncurses_tools.h"
 
@@ -358,7 +353,7 @@ char *wstringInput(WINDOW *win, int y, int x, int len, int max, char *sample)
             wrefresh (win);
             break;
 
-        default:			/* normal input */
+        default:            /* normal input */
             if (isprintable (in))
             {
                 if (win->_curx != (x + max - 1))

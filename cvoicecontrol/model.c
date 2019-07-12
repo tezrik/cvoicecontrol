@@ -15,13 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-
 #include "model.h"
-
-#include "preprocess.h"
 
 /*****
  * a string s is stored in the speaker model file

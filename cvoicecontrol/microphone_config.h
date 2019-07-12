@@ -1,6 +1,6 @@
 /***************************************************************************
                           microphone_config.h  -  microphone calibration
-                          												tool
+                                                                        tool
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -16,11 +16,20 @@
  *                                                                         *
  ***************************************************************************/
 
+#ifndef CVC_MICROPHONE_CONFIG_H
+#define CVC_MICROPHONE_CONFIG_H
+
+#include <ncurses.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+#include "configuration.h"
 #include "mixer.h"
 #include "audio.h"
-
-#ifndef MICROPHONE_CONFIG_H
-#define MICROPHONE_CONFIG_H
+#include "preprocess.h"
+#include "ncurses_tools.h"
 
 enum state {inactive, invalid, ok};
 
@@ -48,4 +57,4 @@ float high_volume = 0.75;
 #define MIN_REASONABLE_MIC_LEVEL   20
 #define MAX_REASONABLE_IGAIN_LEVEL 50
 
-#endif
+#endif //CVC_MICROPHONE_CONFIG_H//

@@ -1,6 +1,6 @@
 /***************************************************************************
                           ncurses_tools.h  -  stuff to simplify the use of
-                          										the ncurses library
+                                                                the ncurses library
                              -------------------
     begin                : Sat Feb 12 2000
     copyright            : (C) 2000 by Daniel Kiecza
@@ -16,16 +16,20 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef CURSES_TOOLS_H
-#define CURSES_TOOLS_H
+#ifndef CVC_CURSES_TOOLS_H
+#define CVC_CURSES_TOOLS_H
+
+#include <stdlib.h>
+#include <string.h>
+#include <ncurses.h>
 
 #ifndef CTRL
-#define CTRL(x)		((x) & 0x1f)
+#define CTRL(x)     ((x) & 0x1f)
 #endif
 
-#define QUIT		CTRL('Q')
-#define ESCAPE		CTRL('[')
-#define ENTER		'\n'
+#define QUIT        CTRL('Q')
+#define ESCAPE      CTRL('[')
+#define ENTER       '\n'
 
 #define  ESCAPE_CHARACTER  27
 #define  BACKSPACE        127
@@ -66,5 +70,5 @@ int color_term = 0;
 extern int color_term;
 #endif
 
-#endif
+#endif //CVC_CURSES_TOOLS_H//
 

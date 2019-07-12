@@ -15,13 +15,14 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MODEL_H
-#define MODEL_H
+#ifndef CVC_MODEL_H
+#define CVC_MODEL_H
 
-#include<preprocess.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
-/* # include<stdlib.h> */
-/* # include<stdio.h>  */
+#include "preprocess.h"
 
 /********************************************************************************
  * data structure for a sample utterance
@@ -132,4 +133,4 @@ char *model_file_extension = ".cvc";
 extern char *model_file_extension;
 #endif
 
-#endif
+#endif //CVC_MODEL_H//

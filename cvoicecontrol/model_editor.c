@@ -17,22 +17,7 @@
 
 #define MAIN_C
 
-#include <ncurses.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
-#include <unistd.h>
-
 #include "model_editor.h"
-
-#include "model.h"
-#include "mixer.h"
-#include "audio.h"
-#include "preprocess.h"
-#include "configuration.h"
-
-#include "ncurses_tools.h"
 
 Model *model;                  /***** speaker model */
 char *model_file_name = NULL;  /***** name of speaker model file */
@@ -757,7 +742,7 @@ int main(int argc, char *argv[])
         printf("options:\n");
         printf("          -a    enable auto search mixer\n");
         printf("          -h    this help\n");
-        return 0;       
+        return 0;
     }
     /*****
      * boolean value indicates when to break main loop
