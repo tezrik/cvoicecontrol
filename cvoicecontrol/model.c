@@ -158,7 +158,10 @@ int loadModel(Model *model, char *file_name, int load_wav)
     fgetstring(tmp_string, fp);
     sscanf(tmp_string, "KVoiceControl Speakermodel V%s\n", tmp_string2);
     if (strcmp(tmp_string2, "1.0") != 0)
+    {
+        fclose(fp);
         return 0;
+    }
 
     /*****
      * read total number of sample utterances

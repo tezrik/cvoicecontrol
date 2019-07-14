@@ -95,6 +95,7 @@ int loadConfiguration(int automix)
     {
         fprintf(stderr, "Failed to read config file: %s\n", config_file);
         fprintf(stderr, "Please run 'cvoicecontrol_microphone_config' first!\n");
+        free(config_file);
         return 0;
     }
     else
@@ -192,6 +193,7 @@ int loadConfiguration(int automix)
         openAudio();
         getBlockMax();
         closeAudio();
+        free(config_file);
     }
 
     return 1;
