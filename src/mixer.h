@@ -40,13 +40,14 @@ void setMixer(char *dev);
 int  mixerOK();
 const char *getMixer();
 int  initMixer(int automix);
-MixerDevices *scanMixerDevices(int automix);
+MixerDevices *scanMixerDevices(int automix, char* argmix);
 
 int setIGainLevel(int level);
 int setMicLevel(int level);
 
 #define MIXER_ERR -1
 #define MIXER_OK  1
+#define MIXER_DEFAUL "/dev/mixer"
 
 int mic_level;
 int igain_level;

@@ -1116,9 +1116,8 @@ int main(int argc, char *argv[])
     int automix = 0;
     int autohome = 0;
     int fhelp = 0;
-    char *namefilter;
-    namefilter="threshold";
-    while ((opt = getopt(argc, argv, ":adh")) != -1)
+    char *argmix = MIXER_DEFAUL;
+    while ((opt = getopt(argc, argv, ":adm:h")) != -1)
     {
         switch(opt)
         {
@@ -1127,6 +1126,9 @@ int main(int argc, char *argv[])
                 break;
             case 'd':
                 autohome = 1;
+                break;
+            case 'm':
+                argmix = optarg;
                 break;
             case 'h':
                 fhelp = 1;
@@ -1143,9 +1145,10 @@ int main(int argc, char *argv[])
     {
         printf("Usage : %s [options]\n\n", argv[0]);
         printf("options:\n");
-        printf("          -a    enable auto search mixer\n");
-        printf("          -d    enable search config in home\n");
-        printf("          -h    this help\n");
+        printf("          -a      enable auto search mixer\n");
+        printf("          -d      enable search config in home\n");
+        printf("          -m dev  select mixer (/dev/mixer)\n");
+        printf("          -h      this help\n");
         return 0;
     }
 
@@ -1164,7 +1167,7 @@ int main(int argc, char *argv[])
 
     /* ***** detect available mixer devices */
 
-    mixer_devices = scanMixerDevices(automix);
+    mixer_devices = scanMixerDevices(automix, argmix);
     if (mixer_devices == NULL || mixer_devices->count == 0)
     {
         /* ***** no mixer devices available -> exit! */

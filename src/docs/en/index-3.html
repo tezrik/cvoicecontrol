@@ -22,8 +22,8 @@
 <P>CVoiceControl consists of three executables:
 <P>
 <UL>
-<LI><CODE>microphone_config</CODE></LI>
-<LI><CODE>model_editor</CODE></LI>
+<LI><CODE>cvoicecontrol_microphone_config</CODE></LI>
+<LI><CODE>cvoicecontrol_model_editor</CODE></LI>
 <LI><CODE>cvoicecontrol</CODE></LI>
 </UL>
 <P>First of all, you have to calibrate your microphone to use it
@@ -45,7 +45,7 @@ Also the structure of the speaker models will be described more closely.
 command
 <BLOCKQUOTE><CODE>
 <PRE>
-% microphone_config
+% cvoicecontrol_microphone_config [ -a | -m /dev/mixer ]
 </PRE>
 </CODE></BLOCKQUOTE>
 
@@ -149,7 +149,7 @@ reference item will be chosen as recognition result.
 <P>To launch the speaker model editor open a console and type:
 <BLOCKQUOTE><CODE>
 <PRE>
-% model_editor
+% cvoicecontrol_model_editor [ -a ]
 </PRE>
 </CODE></BLOCKQUOTE>
 <P>From the main menu of the editor you can reset the current speaker
@@ -242,7 +242,7 @@ automatically!
 <P>To start the speech recognizer open a console and type:
 <BLOCKQUOTE><CODE>
 <PRE>
-% cvoicecontrol &lt;model_file&gt;
+% cvoicecontrol [ -a ] &lt;model_file&gt;
 </PRE>
 </CODE></BLOCKQUOTE>
 

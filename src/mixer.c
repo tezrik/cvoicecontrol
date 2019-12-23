@@ -169,7 +169,7 @@ int initMixer(int automix)
  * return a list of available mixer devices
  ********************************************************************************/
 
-MixerDevices *scanMixerDevices(int automix)
+MixerDevices *scanMixerDevices(int automix, char* argmix)
 {
     int i,j;            /***** counter variables */
     int mask_mixer, fd; /***** mixer device related variables */
@@ -190,42 +190,48 @@ MixerDevices *scanMixerDevices(int automix)
      * allocate memory for the structure that will contain
      * the information about the list of available mixer devices
      *****/
-    devices       = malloc(sizeof(MixerDevices));
+    devices = malloc(sizeof(MixerDevices));
 
     if (automix)
     {
         devices->name = malloc((sizeof (char *))*result.gl_pathc);
-
-        /***** check each mixer device whether it is working properly */
-
-        for (i = 0, j = 0; i < result.gl_pathc; i++)
+        if (devices->name)
         {
-            /***** scan abilities of current mixer device */
 
-            if ((fd = open(result.gl_pathv[i], O_RDWR, 0)) != -1       &&
+            /***** check each mixer device whether it is working properly */
+
+            for (i = 0, j = 0; i < result.gl_pathc; i++)
+            {
+                /***** scan abilities of current mixer device */
+
+                if ((fd = open(result.gl_pathv[i], O_RDWR, 0)) != -1       &&
                     ioctl(fd, SOUND_MIXER_READ_DEVMASK, &mask_mixer) != -1 &&
                     (mask_mixer & SOUND_MASK_MIC)   &&
                     /* (mask_mixer & SOUND_MASK_IGAIN) && */
                     ioctl(fd, SOUND_MIXER_READ_RECMASK, &mask_mixer) != -1 &&
                     (mask_mixer & SOUND_MASK_MIC))
-            {
-                /***** if mixer device looks ok add it to the list */
+                {
+                    /***** if mixer device looks ok add it to the list */
 
-                devices->name[j] = malloc(strlen(result.gl_pathv[i])-5+1);
-                strcpy(devices->name[j], result.gl_pathv[i]+5);
-                j++;
+                    devices->name[j] = malloc(strlen(result.gl_pathv[i])-5+1);
+                    strcpy(devices->name[j], result.gl_pathv[i]+5);
+                    j++;
+                }
+
+                close(fd);
             }
-
-            close(fd);
         }
 
         devices->count = j; /***** number of ok looking mixer devices */
     } else {
-        devices->name = malloc(sizeof ("mixer"));
-        devices->name[0] = malloc(strlen("mixer")-5+1);
-        strcpy(devices->name[0], "mixer");
+        devices->name = malloc(sizeof (char *));
+        if (devices->name)
+        {
+            devices->name[0] = malloc(strlen(argmix)-5+1);
+            strcpy(devices->name[0], argmix+5);
 
-        devices->count = 1; /***** number of ok looking mixer devices */
+            devices->count = 1; /***** number of ok looking mixer devices */
+        }
     }
 
     return devices; /***** return the information */

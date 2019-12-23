@@ -3,7 +3,7 @@ AC_INIT(Makefile.am)
 
 AM_CONFIG_HEADER(config.h)
 
-AM_INIT_AUTOMAKE(cvoicecontrol,0.9)
+AM_INIT_AUTOMAKE(cvoicecontrol,0.9.1)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -20,6 +20,6 @@ dnl Checks for typedefs, structures, and compiler characteristics.
 dnl Checks for library functions.
 
 AC_OUTPUT(Makefile \
-cvoicecontrol/Makefile \
-cvoicecontrol/docs/Makefile \
-cvoicecontrol/docs/en/Makefile)
+src/Makefile \
+src/docs/Makefile \
+src/docs/en/Makefile)

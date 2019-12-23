@@ -2,7 +2,7 @@ dist-hook:
 
 ####### kdevelop will overwrite this part!!! (begin)##########
 
-SUBDIRS = cvoicecontrol
+SUBDIRS = src
 
 EXTRA_DIST = cvoicecontrol.kdevprj AUTHORS COPYING ChangeLog INSTALL README BUGS FAQ cvoicecontrol.lsm
 
