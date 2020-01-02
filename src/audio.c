@@ -387,7 +387,7 @@ int playUtterance(unsigned char *wav, int length)
 
 unsigned char *getUtterance(int *length)
 {
-    int i;
+    int i, fragsize2 = FRAG_SIZE/2 - 1;
     signed short max = 0;
 
     /***** set prefetch buffer size to 5, and allocate memory */
@@ -426,15 +426,7 @@ unsigned char *getUtterance(int *length)
 
     while (count < CONSECUTIVE_SPEECH_BLOCKS_THRESHOLD)
     {
-        if (keyPressed())
-        {
-            return_buffer = NULL;
-            goto getUtteranceReturn;
-        }
-
-        /* fprintf(stderr, "%d ", fgetc_unlocked(stdin)); */
-
-        if (read(fd_audio, buffer_raw, FRAG_SIZE) != FRAG_SIZE)
+        if (keyPressed() || read(fd_audio, buffer_raw, FRAG_SIZE) != FRAG_SIZE)
         {
             return_buffer = NULL;
             goto getUtteranceReturn;
@@ -446,7 +438,7 @@ unsigned char *getUtterance(int *length)
         /***** check for speech */
 
         max = 0;
-        for (i = 0; i < FRAG_SIZE/2 - 1; i += 2)
+        for (i = 0; i < fragsize2; i += 2)
         {
             signed short value = abs((signed short)(buffer_raw[i]|(buffer_raw[i+1]<<8)));
 
@@ -481,13 +473,7 @@ unsigned char *getUtterance(int *length)
     {
         struct Buffer *data = (struct Buffer *)malloc(sizeof(struct Buffer));
 
-        if (keyPressed())
-        {
-            return_buffer = NULL;
-            goto getUtteranceReturn;
-        }
-
-        if (read(fd_audio, data->buffer, FRAG_SIZE) != FRAG_SIZE)
+        if (keyPressed() || read(fd_audio, data->buffer, FRAG_SIZE) != FRAG_SIZE)
         {
             free(data);
             return_buffer = NULL;
@@ -503,7 +489,7 @@ unsigned char *getUtterance(int *length)
         /***** check for nonspeech */
 
         max = 0;
-        for (i = 0; i < FRAG_SIZE/2 - 1; i += 2)
+        for (i = 0; i < fragsize2; i += 2)
         {
             signed short value = abs((signed short)(data->buffer[i]|(data->buffer[i+1]<<8)));
 
@@ -525,10 +511,12 @@ unsigned char *getUtterance(int *length)
     {
         struct Buffer *tmp_buffer = first;
 
+        fragsize2 = 0;
         for (i = 0; i < nr_of_blocks; i++)
         {
-            memcpy(return_buffer+(i*FRAG_SIZE), tmp_buffer->buffer, FRAG_SIZE);
+            memcpy(return_buffer+fragsize2, tmp_buffer->buffer, FRAG_SIZE);
             tmp_buffer = tmp_buffer->next;
+            fragsize2 += FRAG_SIZE;
         }
     }
 

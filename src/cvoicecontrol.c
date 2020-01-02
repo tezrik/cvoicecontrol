@@ -335,9 +335,14 @@ inline float euklid_distance(float *a, float *b)
      * sum up the squares of the differences of the vector's components
      * the result is the square root of this value
      *****/
+/*
     for (i = 0; i < FEAT_VEC_SIZE; i++)
         result += (a[i]-b[i])*(a[i]-b[i]);
     result = sqrt(result);
+*/
+    for (i = 0; i < FEAT_VEC_SIZE; i++)
+        result += (a[i]>b[i]) ? (a[i]-b[i]) : (b[i]-a[i]);
+    result /= FEAT_VEC_SIZE;
     return result;
 }
 
@@ -387,7 +392,7 @@ void recognize(void)
      *****/
     ModelItemSample *sample;
 
-    float act_dist;        /***** (euklid) distance at current DTW position */
+    float act_dist, euklid_dist; /***** (euklid) distance at current DTW position */
     float column_min_dist; /***** minimum distance in current DTW column */
     float tmp_dist;        /***** temp. variable */
 
@@ -709,12 +714,14 @@ void recognize(void)
 
                     /***** ccalculate the first <sloppy_corner> items in the current column */
 
-                    sample->matrix[0][0] = 2*euklid_distance(sample->data[0], frame);
+                    euklid_dist = euklid_distance(sample->data[0], frame);
+                    sample->matrix[0][0] = euklid_dist + euklid_dist;
                     column_min_dist = sample->matrix[0][0]/((0+1)+(0+1));
 
                     for (i = 1; i < sloppy_corner ; i++)
                     {
-                        sample->matrix[0][i] = sample->matrix[0][i-1] + euklid_distance(sample->data[i], frame);
+                        euklid_dist = euklid_distance(sample->data[i], frame);
+                        sample->matrix[0][i] = sample->matrix[0][i-1] + euklid_dist;
 
                         tmp_dist = sample->matrix[0][i]/((0+1)+(i+1));
                         if (tmp_dist < column_min_dist)
@@ -736,12 +743,13 @@ void recognize(void)
 
                     /***** calculate the first <sloppy_corner+1> elements */
 
-                    sample->matrix[1][0] = sample->matrix[0][0] + euklid_distance(sample->data[0], frame);
+                    euklid_dist = euklid_distance(sample->data[0], frame);
+                    sample->matrix[1][0] = sample->matrix[0][0] + euklid_dist;
                     column_min_dist = sample->matrix[1][0]/((1+1)+(0+1));
 
                     sample->matrix[1][1] = MIN3(sample->matrix[0][1] + act_dist,
                                                 sample->matrix[1][0] + act_dist,
-                                                sample->matrix[0][0] + 2*act_dist);
+                                                sample->matrix[0][0] + act_dist + act_dist);
 
                     tmp_dist = sample->matrix[1][1]/((1+1)+(1+1));
                     if (tmp_dist < column_min_dist)
@@ -750,11 +758,12 @@ void recognize(void)
                     for (i = 2; i < sloppy_corner+1 ; i++)
                     {
                         act_dist = euklid_distance(sample->data[i], frame);
+                        euklid_dist = euklid_distance(sample->data[i-1], frame);
 
                         sample->matrix[1][i] = MIN3(sample->matrix[0][i]   + act_dist,
-                                                    sample->matrix[0][i-1] + 2*act_dist,
-                                                    sample->matrix[0][i-2] +
-                                                    2*euklid_distance(sample->data[i-1], frame) + act_dist);
+                                                    sample->matrix[0][i-1] + act_dist + act_dist,
+                                                    sample->matrix[0][i-2] + euklid_dist +
+                                                    euklid_dist + act_dist);
 
                         tmp_dist = sample->matrix[1][i]/((1+1)+(i+1));
                         if (tmp_dist < column_min_dist)
@@ -777,19 +786,21 @@ void recognize(void)
 
                     if (pos < sloppy_corner) /***** element in first row of DTW matrix */
                     {
-                        sample->matrix[pos%3][0] = sample->matrix[(pos-1)%3][0] + euklid_distance(sample->data[0], frame);
+                        euklid_dist = euklid_distance(sample->data[0], frame);
+                        sample->matrix[pos%3][0] = sample->matrix[(pos-1)%3][0] + euklid_dist;
                         column_min_dist = sample->matrix[pos%3][0]/((pos+1)+(0+1));
                     }
                     if (pos < sloppy_corner+1) /***** element in second row of DTW matrix */
                     {
                         act_dist = euklid_distance(sample->data[1], frame);
+                        euklid_dist = euklid_distance(sample->data[1], last_frame);
 
                         /***** use a simpler, smaller warping function that fits into the DTW matrix */
 
                         sample->matrix[pos%3][1] = MIN3(sample->matrix[pos%3][0]     + act_dist,
-                                                        sample->matrix[(pos-1)%3][0] + 2*act_dist,
-                                                        sample->matrix[(pos-2)%3][0] +
-                                                        2* euklid_distance(sample->data[1], last_frame) + act_dist);
+                                                        sample->matrix[(pos-1)%3][0] + act_dist + act_dist,
+                                                        sample->matrix[(pos-2)%3][0] + euklid_dist +
+                                                        euklid_dist + act_dist);
 
                         tmp_dist = sample->matrix[pos%3][1]/((pos+1)+(1+1));
                         if (tmp_dist < column_min_dist)
@@ -818,11 +829,13 @@ void recognize(void)
                                 sample->matrix[(pos-1)%3][j-2] < float_max ||
                                 sample->matrix[(pos-2)%3][j-1] < float_max)
                         {
-                            sample->matrix[pos%3][j] = MIN3(sample->matrix[(pos-1)%3][j-1] + 2*act_dist,
-                                                            sample->matrix[(pos-1)%3][j-2] +
-                                                            2*euklid_distance(sample->data[j-1], frame) + act_dist,
-                                                            sample->matrix[(pos-2)%3][j-1] +
-                                                            2*euklid_distance(sample->data[j], last_frame) + act_dist);
+                            euklid_dist = euklid_distance(sample->data[j-1], frame);
+                            tmp_dist = euklid_distance(sample->data[j], last_frame);
+                            sample->matrix[pos%3][j] = MIN3(sample->matrix[(pos-1)%3][j-1] + act_dist + act_dist,
+                                                            sample->matrix[(pos-1)%3][j-2] + euklid_dist +
+                                                            euklid_dist + act_dist,
+                                                            sample->matrix[(pos-2)%3][j-1] + tmp_dist +
+                                                            tmp_dist + act_dist);
 
                             tmp_dist = sample->matrix[pos%3][j]/((pos+1)+(j+1));
                             if (tmp_dist < column_min_dist)
@@ -966,13 +979,13 @@ void recognize(void)
                                 sample->matrix[(pos-1)%3][j-2] < float_max ||
                                 sample->matrix[(pos-2)%3][j-1] < float_max)
                         {
-                            sample->matrix[pos%3][j] = MIN3(sample->matrix[(pos-1)%3][j-1] + 2*act_dist,
-                                                            sample->matrix[(pos-1)%3][j-2] +
-                                                            2*euklid_distance(sample->data[j-1],
-                                                                    test_utterance[pos-bNb_start_pos]) + act_dist,
-                                                            sample->matrix[(pos-2)%3][j-1] +
-                                                            2*euklid_distance(sample->data[j],
-                                                                    test_utterance[pos-bNb_start_pos-1]) + act_dist);
+                            euklid_dist = euklid_distance(sample->data[j-1], test_utterance[pos-bNb_start_pos]);
+                            tmp_dist = euklid_distance(sample->data[j], test_utterance[pos-bNb_start_pos-1]);
+                            sample->matrix[pos%3][j] = MIN3(sample->matrix[(pos-1)%3][j-1] + act_dist + act_dist,
+                                                            sample->matrix[(pos-1)%3][j-2] + euklid_dist +
+                                                            euklid_dist + act_dist,
+                                                            sample->matrix[(pos-2)%3][j-1] + tmp_dist +
+                                                            tmp_dist + act_dist);
 
                             tmp_dist = sample->matrix[pos%3][j]/((pos+1)+(j+1));
                             if (tmp_dist < column_min_dist)
@@ -1037,7 +1050,7 @@ void preprocess(void)
 
     /***** counter variables */
 
-    int frameI, i;
+    int frameI, i, frameOffset;
 
     /***** remainder  */
 
@@ -1109,8 +1122,11 @@ void preprocess(void)
             /***** prepare a hamming windowed frame from the audio data ... */
 
             for (i = 0; i < FFT_SIZE; i++)
-                frame[i] = ((float)((signed short)(buffer[frameI*OFFSET+2*i]|(buffer[frameI*OFFSET+2*i+1]<<8)))) *
+            {
+                frameOffset = frameI*OFFSET+i+i;
+                frame[i] = ((float)((signed short)(buffer[frameOffset]|(buffer[frameOffset+1]<<8)))) *
                            hamming_window[i];
+            }
 
             preprocessFrame(frame, feat_vector); /* ... and have it preprocessed */
 
@@ -1147,7 +1163,10 @@ void preprocess(void)
             memcpy(buffer, buffer+frames_N*OFFSET, remainder);
         else
             for (i = 0; i < remainder; i++)
-                buffer[i] = buffer[i+frames_N*OFFSET];
+            {
+                frameOffset = frames_N*OFFSET;
+                buffer[i] = buffer[i+frameOffset];
+            }
 
         buffer_counter = remainder;
     }
