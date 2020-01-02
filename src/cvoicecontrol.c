@@ -438,6 +438,8 @@ void recognize(void)
     /* adjust_win_width and score_threshold should be put in a config file type of place */
     adjust_window_width = 90;
     sloppy_corner = 4;
+    int test_utt_length2 = (test_utt_length+test_utt_length-2) + (sloppy_corner-1);
+    int test_utt_lengthm = (test_utt_length-sloppy_corner)/2;
     /* score_threshold = 18; */
     float_max = FLT_MAX*0.0001;
 
@@ -583,6 +585,8 @@ void recognize(void)
                 if (remaining_frames >= 30 && !abort_requested)
                 {
                     test_utt_length = remaining_frames + pos; /***** total length of test utterance */
+                    test_utt_length2 = (test_utt_length+test_utt_length-2) + (sloppy_corner-1);
+                    test_utt_lengthm = (test_utt_length-sloppy_corner)/2;
 
                     /***** switch to branch and bound method at DTW column 'pos' */
 
@@ -611,8 +615,8 @@ void recognize(void)
                         int j; /****** counter variable */
 
                         if (!(model->direct[i]->isActive)                     ||  /***** item still active */
-                                ((test_utt_length-1)*2 + (sloppy_corner-1) < I-1) ||  /***** min slope is 0.5 */
-                                ((test_utt_length-sloppy_corner)/2 > I-1)         ||  /***** max slope is 2 */
+                                (test_utt_length2 < I-1) ||  /***** min slope is 0.5 */
+                                (test_utt_lengthm > I-1)         ||  /***** max slope is 2 */
                                 (I + adjust_window_width < test_utt_length)       ||  /***** adjustment window right side */
                                 (I - adjust_window_width > test_utt_length))          /***** adjustment window left side */
                             continue;
@@ -1050,7 +1054,7 @@ void preprocess(void)
 
     /***** counter variables */
 
-    int frameI, i, frameOffset;
+    int frameI, i, frameOffset0, frameOffset;
 
     /***** remainder  */
 
@@ -1117,16 +1121,18 @@ void preprocess(void)
 
         /***** extract these frames: */
 
+        frameOffset0 = 0;
         for (frameI = 0; frameI < frames_N; frameI++)
         {
             /***** prepare a hamming windowed frame from the audio data ... */
 
             for (i = 0; i < FFT_SIZE; i++)
             {
-                frameOffset = frameI*OFFSET+i+i;
+                frameOffset = frameOffset0+i+i;
                 frame[i] = ((float)((signed short)(buffer[frameOffset]|(buffer[frameOffset+1]<<8)))) *
                            hamming_window[i];
             }
+            frameOffset0 += OFFSET;
 
             preprocessFrame(frame, feat_vector); /* ... and have it preprocessed */
 
@@ -1159,12 +1165,12 @@ void preprocess(void)
          *
          * use memcpy, if the two memory regions do not overlap, otherwise use for
          *****/
-        if (remainder < frames_N*OFFSET)
-            memcpy(buffer, buffer+frames_N*OFFSET, remainder);
+        frameOffset = frames_N*OFFSET;
+        if (remainder < frameOffset)
+            memcpy(buffer, buffer+frameOffset, remainder);
         else
             for (i = 0; i < remainder; i++)
             {
-                frameOffset = frames_N*OFFSET;
                 buffer[i] = buffer[i+frameOffset];
             }
 
