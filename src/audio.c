@@ -251,14 +251,14 @@ int getBlockMax()
 
     unsigned char buffer_raw[FRAG_SIZE];
     signed short max = 0;
-    int i;
+    int i, fragsize2 = FRAG_SIZE/2 - 1;
 
     if (read(fd_audio, buffer_raw, FRAG_SIZE) != FRAG_SIZE)
         return -1;
 
     /***** retrieve max value */
 
-    for (i = 0; i < FRAG_SIZE/2 - 1; i += 2)
+    for (i = 0; i < fragsize2; i += 2)
     {
         signed short value = abs((signed short)(buffer_raw[i]|(buffer_raw[i+1]<<8)));
         if (value > max)
@@ -279,7 +279,7 @@ int calculateChannelMean()
     int   frameI, i;                  /***** counter variables */
     float feat_vector[FEAT_VEC_SIZE]; /***** preprocessed feature vector */
 
-    int N = 100;
+    int N = 100, fragoffset = 0;
 
     unsigned char buffer[N*FRAG_SIZE];
 
@@ -287,8 +287,11 @@ int calculateChannelMean()
         channel_mean[i] = 0;
 
     for (i = 0; i < N; i++)
-        if (read(fd_audio, buffer+i*FRAG_SIZE, FRAG_SIZE) != FRAG_SIZE)
+    {
+        if (read(fd_audio, buffer+fragoffset, FRAG_SIZE) != FRAG_SIZE)
             return AUDIO_ERR;
+        fragoffset += FRAG_SIZE;
+    }
 
     /***** do preprocessing and calculate mean vector */
 
@@ -302,15 +305,16 @@ int calculateChannelMean()
     frames_N = (N*FRAG_SIZE-FFT_SIZE_CHAR)/OFFSET + 1;
 
     /***** extract these frames: */
-
+    fragoffset = 0;
     for (frameI = 0; frameI < frames_N; frameI++)
     {
         /***** gather frame */
 
         for (i = 0; i < FFT_SIZE; i++)
-            frame[i] = ((float)((signed short)(buffer[frameI*OFFSET+2*i]|(buffer[frameI*OFFSET+2*i+1]<<8)))) *
+            frame[i] = ((float)((signed short)(buffer[fragoffset+i+i]|(buffer[fragoffset+i+i+1]<<8)))) *
                        hamming_window[i];
 
+        fragoffset += OFFSET;
         preprocessFrame(frame, feat_vector);
 
         for (i = 0; i < FEAT_VEC_SIZE; i++)
@@ -541,7 +545,7 @@ float **preprocessUtterance(unsigned char *wav, int wav_length, int *prep_length
 {
     float frame[FFT_SIZE];            /***** data containers used for fft calculation */
     int   frames_N;                   /***** number of whole (overlapping) frames in current waveform buffer */
-    int   frameI, i;                  /***** counter variables */
+    int   frameI, i, fragoffset;      /***** counter variables */
     float feat_vector[FEAT_VEC_SIZE]; /***** preprocessed feature vector */
 
     float **return_buffer;
@@ -557,15 +561,16 @@ float **preprocessUtterance(unsigned char *wav, int wav_length, int *prep_length
     *prep_length = frames_N;
 
     /***** extract these frames: */
-
+    fragoffset = 0;
     for (frameI = 0; frameI < frames_N; frameI++)
     {
         /***** gather frame */
 
         for (i = 0; i < FFT_SIZE; i++)
-            frame[i] = ((float)((signed short)(wav[frameI*OFFSET+2*i]|(wav[frameI*OFFSET+2*i+1]<<8)))) *
+            frame[i] = ((float)((signed short)(wav[fragoffset+i+i]|(wav[fragoffset+i+i+1]<<8)))) *
                        hamming_window[i];
 
+        fragoffset += OFFSET;
         preprocessFrame(frame, feat_vector);
 
         for (i = 0; i < FEAT_VEC_SIZE; i++)
@@ -581,4 +586,3 @@ float **preprocessUtterance(unsigned char *wav, int wav_length, int *prep_length
 
     return (return_buffer);
 }
-
