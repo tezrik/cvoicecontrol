@@ -26,7 +26,7 @@ int i,j; /***** counter variables */
 
 int initPreprocess()
 {
-    float tmp;
+    float coefPI, coefPIt;
     int i;
 
     /*****
@@ -42,9 +42,13 @@ int initPreprocess()
 
     /***** setup hamming window */
 
-    tmp = 2.0*M_PI/(HAMMING_SIZE-1);
+    coefPI = (M_PI+M_PI)/(HAMMING_SIZE-1);
+    coefPIt = 0.0;
     for (i = 0; i < HAMMING_SIZE; i++)
-        hamming_window[i] = 0.54 - 0.46*cos(tmp*i);
+    {
+        hamming_window[i] = 0.54 - 0.46*cos(coefPIt);
+        coefPIt += coefPI;
+    }
 
     /***** initialize mel scale filter bank */
 
