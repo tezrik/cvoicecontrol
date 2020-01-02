@@ -38,8 +38,9 @@ void initialize_FFT(int fftlen)
      *  (This optimization can be made since the data is real.)
      *****/
     Points = fftlen/2;
+    int Points2 = Points + Points, Pointsd = Points / 2;
 
-    if((SinTable=(float *)malloc(2*Points*sizeof(float)))==NULL)
+    if((SinTable=(float *)malloc(Points2*sizeof(float)))==NULL)
     {
         puts("Error allocating memory for Sine table.");
         exit(1);
@@ -53,16 +54,18 @@ void initialize_FFT(int fftlen)
     for(i=0; i<Points; i++)
     {
         temp=0;
-        for(mask=Points/2; mask>0; mask >>= 1)
+        for(mask=Pointsd; mask>0; mask >>= 1)
             temp=(temp >> 1) + (i&mask ? Points : 0);
 
         bit_reversed[i]=temp;
     }
 
+    float coefPI = (float)M_PI / Points, coefPIt = 0.0;
     for(i=0; i<Points; i++)
     {
-        SinTable[bit_reversed[i]  ]=-sin(2*M_PI*i/(2*Points));
-        SinTable[bit_reversed[i]+1]=-cos(2*M_PI*i/(2*Points));
+        SinTable[bit_reversed[i]  ]=-sin(coefPIt);
+        SinTable[bit_reversed[i]+1]=-cos(coefPIt);
+        coefPIt += coefPI;
     }
 }
 
@@ -104,7 +107,7 @@ void real_FFT(float *buffer)
     while(ButterfliesPerGroup>0)
     {
         A=buffer;
-        B=buffer+ButterfliesPerGroup*2;
+        B=buffer+ButterfliesPerGroup+ButterfliesPerGroup;
         sptr=SinTable;
 
         while(A<endptr1)
@@ -122,7 +125,8 @@ void real_FFT(float *buffer)
                 *(A++)=*(B++)+v2;
             }
             A=B;
-            B+=ButterfliesPerGroup*2;
+            B+=ButterfliesPerGroup;
+            B+=ButterfliesPerGroup;
             sptr+=2;
         }
         ButterfliesPerGroup >>= 1;
@@ -141,8 +145,8 @@ void real_FFT(float *buffer)
         float cos=SinTable[*br1+1];
         A=buffer+*br1;
         B=buffer+*br2;
-        HRplus = (HRminus = *A     - *B    ) + (*B     * 2);
-        HIplus = (HIminus = *(A+1) - *(B+1)) + (*(B+1) * 2);
+        HRplus = (HRminus = *A     - *B    ) + (*B     + *B);
+        HIplus = (HIminus = *(A+1) - *(B+1)) + (*(B+1) + *(B+1));
         temp1  = (sin*HRminus - cos*HIplus);
         temp2  = (cos*HRminus + sin*HIplus);
         *B     = (*A     = (HRplus  + temp1) * 0.5) - temp1;
