@@ -1217,7 +1217,7 @@ void record(void)
     struct audio_buf_info info;
     signed short max = 0;
     signed short value;
-    int i;
+    int i, fragsize2 = FRAG_SIZE/2 - 1;
 
     /***** needed for select() */
 
@@ -1255,7 +1255,7 @@ void record(void)
                 }
 
                 max = 0;
-                for (i = 0; i < FRAG_SIZE/2 - 1; i += 2)
+                for (i = 0; i < fragsize2; i += 2)
                 {
                     value = abs((signed short)(buffer_raw[i]|(buffer_raw[i+1]<<8)));
                     if (value > max)
@@ -1336,7 +1336,7 @@ void record(void)
                 /***** and check it for speech content */
 
                 max = 0;
-                for (i = 0; i < FRAG_SIZE/2 - 1; i += 2)
+                for (i = 0; i < fragsize2; i += 2)
                 {
                     value = abs((signed short)(buffer_raw[i]|(buffer_raw[i+1]<<8)));
                     if (value > max)
@@ -1372,7 +1372,7 @@ void record(void)
                 /***** check whether no more speech signal, then stop recording */
 
                 max = 0;
-                for (i = 0; i < FRAG_SIZE/2 - 1; i += 2)
+                for (i = 0; i < fragsize2; i += 2)
                 {
                     value = abs((signed short)(buffer_raw[i]|(buffer_raw[i+1]<<8)));
                     if (value > max)
